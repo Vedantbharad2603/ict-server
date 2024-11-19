@@ -1,0 +1,95 @@
+<?php
+
+require_once __DIR__ . '/../controllers/AttendanceController.php';
+
+function AttendanceRoutes($method, $subpath) {
+    switch ($subpath) {
+        case 'TotalAttendance': // Handle "Attendance/TotalAttendance"
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                handleTotalAttendance($input); // Call the controller function
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Invalid request method']);
+            }
+            break;
+        case 'AttendanceByDate': // Handle "Attendance/AttendanceByDate"
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                handleAttendanceByDate($input); // Call the controller function
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Invalid request method']);
+            }
+            break;
+            
+        case 'GetAttendanceList': // Handle "Attendance/GetAttendanceList"
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                handleAttendanceList($input); // Call the controller function
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Invalid request method']);
+            }
+            break;
+            
+        case 'UploadAttendance': // Handle "Attendance/UploadAttendance"
+            // This is where the function for UploadAttendance is called
+            if ($method == 'POST') {
+                // Get the input data (assumed to be sent in the body of the POST request)
+                $input = json_decode(file_get_contents("php://input"), true);
+                
+                // Call the controller function for uploading attendance
+                handleUploadAttendance($input);
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
+            break;
+        
+        case 'GetFacultySchedule': // Handle "Attendance/GetFacultySchedule"
+            if ($method == 'POST') {
+                $input = json_decode(file_get_contents("php://input"), true);  // Decode input
+
+                // Call the controller function to handle the request
+                handleFacultySchedule($input);
+            } else {
+                http_response_code(405);  // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
+            break;
+
+
+        
+            case 'GetStudentsByCC': // Handle "Attendance/GetStudentsByCC"
+        
+            break;
+        case 'GetEngagedStudentsByCC': // Handle "Attendance/GetEngagedStudentsByCC"
+            if ($method == 'POST') {
+                $input = json_decode(file_get_contents("php://input"), true);  // Decode input
+
+                // Call the controller function to handle the request
+                handleEngagedStudentsByCC($input);
+            } else {
+                http_response_code(405);  // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
+            break;
+        case 'UpsertEngagedStudent': // Handle "Attendance/UpsertEngagedStudent"
+            if ($method == 'POST') {
+                $input = json_decode(file_get_contents("php://input"), true);  // Decode input
+
+                // Call the controller function to handle the request
+                handleEngagedStudentUpsert($input);
+            } else {
+                http_response_code(405);  // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
+            break;
+
+        default:
+            http_response_code(404); // Not Found
+            echo json_encode(['message' => 'Invalid Faculty API endpoint']);
+            break;
+    }
+}

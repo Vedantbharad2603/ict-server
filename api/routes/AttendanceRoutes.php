@@ -61,8 +61,14 @@ function AttendanceRoutes($method, $subpath) {
 
 
         
-            case 'GetStudentsByCC': // Handle "Attendance/GetStudentsByCC"
-        
+        case 'GetStudentsByCC': // Handle "Attendance/GetStudentsByCC"
+            if ($method == 'POST') {
+                $input = json_decode(file_get_contents("php://input"), true); // Decode JSON input
+                handleStudentsByCC($input); // Call the controller function
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
             break;
         case 'GetEngagedStudentsByCC': // Handle "Attendance/GetEngagedStudentsByCC"
             if ($method == 'POST') {
@@ -86,7 +92,33 @@ function AttendanceRoutes($method, $subpath) {
                 echo json_encode(['message' => 'Method not allowed for this endpoint']);
             }
             break;
-
+        case 'GetExtraSchedule': // Handle "Attendance/GetExtraSchedule"
+            if ($method == 'POST') {
+                $input = json_decode(file_get_contents("php://input"), true); // Decode JSON input
+                handleExtraSchedule($input); // Call the controller function
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
+            break;
+        case 'GetExtraAttendanceList': // Handle "Attendance/GetExtraAttendanceList"
+            if ($method == 'POST') {
+                $input = json_decode(file_get_contents("php://input"), true); // Decode JSON input
+                handleExtraAttendanceStudentsList($input); // Call the controller function
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
+            break;
+        case 'UploadExtraAttendance': // Handle "Attendance/UploadExtraAttendance"
+            if ($method == 'POST') {
+                $input = json_decode(file_get_contents("php://input"), true); // Decode JSON input
+                handleUploadExtraAttendance($input); // Call the controller function
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed for this endpoint']);
+            }
+            break;
         default:
             http_response_code(404); // Not Found
             echo json_encode(['message' => 'Invalid Faculty API endpoint']);

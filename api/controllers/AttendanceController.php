@@ -130,3 +130,67 @@ function handleEngagedStudentUpsert($input) {
         echo json_encode(['message' => 'All fields are required']);
     }
 }
+
+function handleStudentsByCC($input) {
+    if (isset($input['f_id'])) {
+        $FacultyId = $input['f_id'];
+
+        // Call the service function
+        $response = getStudentsByCC($FacultyId);
+
+        // Send the response
+        echo json_encode($response);
+    } else {
+        // Handle missing required fields
+        http_response_code(400);
+        echo json_encode(['message' => 'Faculty ID is required']);
+    }
+}
+
+function handleExtraSchedule($input) {
+    if (isset($input['f_id'])) {
+        $FacultyId = $input['f_id'];
+
+        // Call the service function
+        $response = getExtraSchedule($FacultyId);
+
+        // Send the response
+        echo json_encode($response);
+    } else {
+        // Handle missing required fields
+        http_response_code(400);
+        echo json_encode(['message' => 'Faculty ID is required']);
+    }
+}
+
+function handleExtraAttendanceStudentsList($input) {
+    if (isset($input['sub_id']) && isset($input['c_date']) && isset($input['f_id'])) {
+        $SubjectId = $input['sub_id'];
+        $FacultyId = $input['f_id'];
+        $CDate = $input['c_date'];
+
+        // Call the service function
+        $response = getExtraAttendanceStudentsList($SubjectId, $FacultyId, $CDate);
+
+        // Send the response
+        echo json_encode($response);
+    } else {
+        // Handle missing required fields
+        http_response_code(400);
+        echo json_encode(['message' => 'Subject ID, Faculty ID, and Date are required']);
+    }
+}
+
+function handleUploadExtraAttendance($input) {
+    if (!empty($input) && is_array($input)) {
+        // Call the service function
+        $response = uploadExtraAttendance($input);
+
+        // Send the response
+        echo json_encode($response);
+    } else {
+        // Handle invalid input format
+        http_response_code(400);
+        echo json_encode(['message' => 'Invalid input format or empty input']);
+    }
+}

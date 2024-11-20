@@ -217,3 +217,132 @@ function upsertEngagedStudent($input) {
         return ['message' => 'Failed to prepare the stored procedure'];
     }
 }
+
+function getStudentsByCC($FacultyId) {
+    global $conn;
+    $stmt = $conn->prepare("CALL GetStudentByCC(?)");
+
+    if ($stmt) {
+        $stmt->bind_param("i", $FacultyId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $students_data = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $students_data[] = $row;
+        }
+
+        $stmt->close();
+
+        if (count($students_data) > 0) {
+            return $students_data; // Return data as an array
+        } else {
+            return ['message' => 'No students'];
+        }
+    } else {
+        return ['message' => 'Failed to prepare the stored procedure'];
+    }
+}
+
+function getExtraSchedule($FacultyId) {
+    global $conn;
+    $stmt = $conn->prepare("CALL GetExtraSchedule(?)");
+
+    if ($stmt) {
+        $stmt->bind_param("i", $FacultyId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $schedule_data = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $schedule_data[] = $row;
+        }
+
+        $stmt->close();
+
+        if (count($schedule_data) > 0) {
+            return $schedule_data; // Return data as an array
+        } else {
+            return ['message' => 'No schedule records'];
+        }
+    } else {
+        return ['message' => 'Failed to prepare the stored procedure'];
+    }
+}
+
+
+function getExtraAttendanceStudentsList($SubjectId, $FacultyId, $CDate) {
+    global $conn;
+
+    $stmt = $conn->prepare("CALL GetExtraAttendanceStudentsList(?,?,?)");
+
+    if ($stmt) {
+        $stmt->bind_param("iis", $SubjectId, $FacultyId, $CDate);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $attendance_data = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $attendance_data[] = $row;
+        }
+
+        $stmt->close();
+
+        if (count($attendance_data) > 0) {
+            return $attendance_data; // Return data as an array
+        } else {
+            return ['message' => 'No students found'];
+        }
+    } else {
+        return ['message' => 'Failed to prepare the stored procedure'];
+    }
+}
+
+function uploadExtraAttendance($attendanceData) {
+    global $conn;
+    $response = [];
+
+    foreach ($attendanceData as $entry) {
+        if (
+            isset($entry['student_info_id']) &&
+            isset($entry['subject_info_id']) &&
+            isset($entry['faculty_info_id']) &&
+            isset($entry['date']) &&
+            isset($entry['count'])
+        ) {
+            $studentId = $entry['student_info_id'];
+            $subjectId = $entry['subject_info_id'];
+            $facultyId = $entry['faculty_info_id'];
+            $date = $entry['date'];
+            $count = $entry['count'];
+
+            $stmt = $conn->prepare("CALL UploadExtraAttendance(?, ?, ?, ?, ?)");
+            if ($stmt) {
+                $stmt->bind_param("iiisi", $subjectId, $facultyId, $studentId, $date, $count);
+
+                try {
+                    $stmt->execute();
+                    if ($stmt->affected_rows > 0) {
+                        $response[] = ['message' => "Attendance uploaded successfully for student ID: $studentId"];
+                    } else {
+                        $response[] = ['message' => "Failed to upload attendance for student ID: $studentId"];
+                    }
+                } catch (mysqli_sql_exception $e) {
+                    if ($e->getCode() == 1062) { 
+                        $response[] = ['message' => "Duplicate entry detected for student ID: $studentId. Skipping..."];
+                    } else {
+                        $response[] = ['message' => 'An error occurred: ' . $e->getMessage()];
+                    }
+                }
+
+                $stmt->close();
+            } else {
+                $response[] = ['message' => 'Failed to prepare the insert statement for student ID: ' . $studentId];
+            }
+        } else {
+            $response[] = ['message' => 'Missing required fields for an entry'];
+        }
+    }
+
+    return $response;
+}

@@ -1,11 +1,11 @@
 # Ignore database connection file
 # db_connection.php
-Api/
-/DB/db_connection.php
+# Api/
+Api/DB/db_connection.php
 
 # Ignore API key validator or authorization file
 # ApiKeyValidator.php
-/Utils/ApiKeyValidator.php
+Api/Utils/ApiKeyValidator.php
 
 # Ignore environment files
 .env

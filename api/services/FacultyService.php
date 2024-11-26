@@ -8,9 +8,25 @@ function FacultyLoginService($username, $password) {
     // Sanitize and validate input
     $username = $conn->real_escape_string($username);
 
-    // Prepare the statement to get the hashed password
-    $stmt = $conn->prepare("SELECT password FROM user_login WHERE username = ? AND role = 'faculty' AND isactive = 1");
+    // Check if the username exists
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM user_login WHERE username = ?");
+    if (!$stmt) {
+        return ['status' => false, 'message' => 'Failed to prepare the statement for username check'];
+    }
 
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $stmt->bind_result($usernameExists);
+    $stmt->fetch();
+    $stmt->close();
+
+    // If username does not exist, return an appropriate message
+    if ($usernameExists == 0) {
+        return ['status' => false, 'message' => 'Username not found'];
+    }
+
+    // Proceed to query the hashed password for faculty
+    $stmt = $conn->prepare("SELECT password FROM user_login WHERE username = ? AND role = 'faculty' AND isactive = 1");
     if (!$stmt) {
         return ['status' => false, 'message' => 'Failed to prepare the statement'];
     }

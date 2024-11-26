@@ -21,8 +21,8 @@ function AppVersionService($login, $code) {
             http_response_code(200); // OK
             return ['status' => true, 'message' => 'Login and code match'];
         } else {
-            http_response_code(404); // Not Found
-            return ['status' => false, 'message' => 'Invalid login or code'];
+            http_response_code(426); // Upgrade Required
+            return ['status' => false, 'message' => 'Your app version is outdated. Please update to continue.'];
         }
     } else {
         $stmt->close();

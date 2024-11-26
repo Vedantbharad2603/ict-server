@@ -5,6 +5,7 @@ require 'routes/AppVersionRoutes.php';
 require 'routes/ParentRoutes.php';
 require 'routes/FacultyRoutes.php';
 require 'routes/AttendanceRoutes.php';
+require 'routes/PasswordRoutes.php';
 
 // Validate API Key
 validateApiKey(); // Check the API key before processing the request
@@ -29,7 +30,9 @@ switch ($endpoint) {
     case 'Attendance':
         AttendanceRoutes($method, $subpath);
         break;
-        
+    case 'Password':
+        PasswordRoutes($method, $subpath);
+        break;
     
 
     default:

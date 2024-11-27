@@ -1,5 +1,5 @@
 <?php
-require './api/db/db_connection.php';
+require '../api/db/db_connection.php';
 
 // Include the required library to generate Excel files (PhpSpreadsheet)
 require 'vendor/autoload.php';

@@ -1,5 +1,5 @@
 <?php
-require './api/db/db_connection.php';
+require '../api/db/db_connection.php';
 require 'vendor/autoload.php'; // Include PHPExcel or PHPSpreadsheet library
 
 use PhpOffice\PhpSpreadsheet\IOFactory;

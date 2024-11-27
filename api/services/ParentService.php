@@ -60,3 +60,28 @@ function ParentService($username, $password) {
     http_response_code(401); // Unauthorized
     return ['status' => false, 'message' => 'Invalid username or password'];
 }
+
+function GetFacultyContactService($studentId) {
+    global $conn; 
+
+    $stmt = $conn->prepare("CALL GetFacultyContactByStudent(?)");
+    if (!$stmt) {
+        return ['status' => false, 'message' => 'Failed to prepare the stored procedure'];
+    }
+    $stmt->bind_param("i", $studentId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+        $faculty_data = [];
+        while ($row = $result->fetch_assoc()) {
+            $faculty_data[] = $row;
+        }
+        $stmt->close();
+        if (count($faculty_data) > 0) {
+            return ['status' => true, 'data' => $faculty_data];
+        }else{
+            return ['status' => false, 'message' => 'Invalid Student Id'];
+        }
+    $stmt->close();
+    http_response_code(401); // Unauthorized
+    return ['status' => false, 'message' => 'Invalid Student Id'];
+}

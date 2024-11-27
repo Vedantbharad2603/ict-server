@@ -1,6 +1,6 @@
 <?php
 
-require './api/db/db_connection.php';
+require '../api/db/db_connection.php';
 // Include PHPExcel library to handle Excel file
 require 'vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;

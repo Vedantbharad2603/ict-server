@@ -85,3 +85,28 @@ function GetFacultyContactService($studentId) {
     http_response_code(401); // Unauthorized
     return ['status' => false, 'message' => 'Invalid Student Id'];
 }
+
+function GetStudentTimetableService($studentId) {
+    global $conn; 
+
+    $stmt = $conn->prepare("CALL GetStudentTimetable(?)");
+    if (!$stmt) {
+        return ['status' => false, 'message' => 'Failed to prepare the stored procedure'];
+    }
+    $stmt->bind_param("i", $studentId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+        $subject_data = [];
+        while ($row = $result->fetch_assoc()) {
+            $subject_data[] = $row;
+        }
+        $stmt->close();
+        if (count($subject_data) > 0) {
+            return ['status' => true, 'data' => $subject_data];
+        }else{
+            return ['status' => false, 'message' => 'Invalid Student Id'];
+        }
+    $stmt->close();
+    http_response_code(401); // Unauthorized
+    return ['status' => false, 'message' => 'Invalid Student Id'];
+}

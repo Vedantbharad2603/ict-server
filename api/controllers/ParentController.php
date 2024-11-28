@@ -39,3 +39,20 @@ function GetFacultyContactController($input) {
         echo json_encode(['message' => $response['message']]);
     }
 }
+
+function GetStudentTimetableController($input) {
+    if (!isset($input['s_id'])) {
+        http_response_code(400); // Bad Request
+        echo json_encode(['message' => 'Student ID required']);
+        return;
+    }
+    $studentId = $input['s_id'];
+
+    $response = GetStudentTimetableService($studentId);
+
+    if ($response['status']) {
+        echo json_encode($response['data']);
+    } else {
+        echo json_encode(['message' => $response['message']]);
+    }
+}

@@ -13,10 +13,19 @@ function ParentRoutes($method, $subpath) {
                 echo json_encode(['message' => 'Method not allowed']);
             }
             break;
-        case 'getFacultyContact': // Handle "Parent/Login"
+        case 'getFacultyContact': // Handle "Parent/getFacultyContact"
             if ($method === 'POST') {
                 $input = json_decode(file_get_contents('php://input'), true);
                 GetFacultyContactController($input);
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed']);
+            }
+            break;
+        case 'getStudentTimetable': // Handle "Parent/getStudentTimetable"
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                GetStudentTimetableController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
                 echo json_encode(['message' => 'Method not allowed']);

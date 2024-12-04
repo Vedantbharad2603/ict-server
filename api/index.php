@@ -8,6 +8,7 @@ require 'routes/AttendanceRoutes.php';
 require 'routes/PasswordRoutes.php';
 require 'routes/ZoomRoutes.php';
 require 'routes/HolidayRoutes.php';
+require 'routes/ExamRoutes.php';
 
 // Validate API Key
 validateApiKey(); // Check the API key before processing the request
@@ -41,7 +42,9 @@ switch ($endpoint) {
     case 'Holiday':
         HolidayRoutes($method, $subpath);
         break;
-    
+    case 'Exam':
+        ExamRoutes($method, $subpath);
+        break;
 
     default:
         http_response_code(404);

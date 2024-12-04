@@ -110,3 +110,4 @@ function GetStudentTimetableService($studentId) {
     http_response_code(401); // Unauthorized
     return ['status' => false, 'message' => 'Invalid Student Id'];
 }
+?>

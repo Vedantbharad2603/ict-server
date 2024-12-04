@@ -23,3 +23,5 @@ function UpdatePasswordController($input) {
         echo json_encode(['status' => false, 'message' => $response['message']]);
     }    
 }
+
+?>

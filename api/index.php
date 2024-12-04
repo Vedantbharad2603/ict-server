@@ -6,6 +6,8 @@ require 'routes/ParentRoutes.php';
 require 'routes/FacultyRoutes.php';
 require 'routes/AttendanceRoutes.php';
 require 'routes/PasswordRoutes.php';
+require 'routes/ZoomRoutes.php';
+require 'routes/HolidayRoutes.php';
 
 // Validate API Key
 validateApiKey(); // Check the API key before processing the request
@@ -32,6 +34,12 @@ switch ($endpoint) {
         break;
     case 'Password':
         PasswordRoutes($method, $subpath);
+        break;
+    case 'ZoomLink':
+        ZooomRoutes($method, $subpath);
+        break;
+    case 'Holiday':
+        HolidayRoutes($method, $subpath);
         break;
     
 

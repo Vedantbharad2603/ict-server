@@ -30,3 +30,5 @@ function AppVersionService($login, $code) {
         return ['status' => false, 'message' => 'Query execution failed'];
     }
 }
+
+?>

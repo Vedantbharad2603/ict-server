@@ -3,10 +3,10 @@
 require_once __DIR__ . '/../controllers/PasswordController.php';
 
 function PasswordRoutes($method, $subpath) {
+    $input = json_decode(file_get_contents('php://input'), true);
     switch ($subpath) {
         case 'updatePassword': // Handle "Password/updatePassword"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 UpdatePasswordController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -20,3 +20,5 @@ function PasswordRoutes($method, $subpath) {
             break;
     }
 }
+
+?>

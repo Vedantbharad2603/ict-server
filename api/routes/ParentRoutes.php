@@ -3,10 +3,10 @@
 require_once __DIR__ . '/../controllers/ParentController.php';
 
 function ParentRoutes($method, $subpath) {
+    $input = json_decode(file_get_contents('php://input'), true);
     switch ($subpath) {
         case 'login': // Handle "Parent/Login"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 ParentLoginController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -15,7 +15,6 @@ function ParentRoutes($method, $subpath) {
             break;
         case 'getFacultyContact': // Handle "Parent/getFacultyContact"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 GetFacultyContactController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -24,7 +23,6 @@ function ParentRoutes($method, $subpath) {
             break;
         case 'getStudentTimetable': // Handle "Parent/getStudentTimetable"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 GetStudentTimetableController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -37,3 +35,4 @@ function ParentRoutes($method, $subpath) {
             break;
     }
 }
+?>

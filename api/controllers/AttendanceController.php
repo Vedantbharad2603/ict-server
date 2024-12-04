@@ -194,3 +194,5 @@ function handleUploadExtraAttendance($input) {
         echo json_encode(['message' => 'Invalid input format or empty input']);
     }
 }
+
+?>

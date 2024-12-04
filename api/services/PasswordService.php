@@ -43,3 +43,4 @@ function UpdatePasswordService($username, $currentPass, $newPass) {
         return ["status" => false, "message" => "Failed to update password"];
     }
 }
+?>

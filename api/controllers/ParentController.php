@@ -56,3 +56,4 @@ function GetStudentTimetableController($input) {
         echo json_encode(['message' => $response['message']]);
     }
 }
+?>

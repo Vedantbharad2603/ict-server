@@ -19,3 +19,4 @@ function AppVersionRoutes($method, $subpath) {
             break;
     }
 }
+?>

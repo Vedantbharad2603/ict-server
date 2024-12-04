@@ -21,3 +21,5 @@ function AppVersionCheckController() {
     $response = AppVersionService($login, $code);
     echo json_encode($response);
 }
+
+?>

@@ -3,10 +3,10 @@
 require_once __DIR__ . '/../controllers/AttendanceController.php';
 
 function AttendanceRoutes($method, $subpath) {
+    $input = json_decode(file_get_contents('php://input'), true);
     switch ($subpath) {
         case 'TotalAttendance': // Handle "Attendance/TotalAttendance"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 handleTotalAttendance($input); // Call the controller function
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -15,7 +15,6 @@ function AttendanceRoutes($method, $subpath) {
             break;
         case 'AttendanceByDate': // Handle "Attendance/AttendanceByDate"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 handleAttendanceByDate($input); // Call the controller function
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -25,7 +24,6 @@ function AttendanceRoutes($method, $subpath) {
             
         case 'GetAttendanceList': // Handle "Attendance/GetAttendanceList"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 handleAttendanceList($input); // Call the controller function
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -125,3 +123,4 @@ function AttendanceRoutes($method, $subpath) {
             break;
     }
 }
+?>

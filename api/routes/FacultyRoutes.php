@@ -3,10 +3,10 @@
 require_once __DIR__ . '/../controllers/FacultyController.php';
 
 function FacultyRoutes($method, $subpath) {
+    $input = json_decode(file_get_contents('php://input'), true);
     switch ($subpath) {
         case 'login': // Handle "Faculty/login"
             if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
                 FacultyLoginController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
@@ -20,3 +20,5 @@ function FacultyRoutes($method, $subpath) {
             break;
     }
 }
+
+?>

@@ -67,7 +67,7 @@ function GetAllHolidaysController() {
     $response = GetAllHolidaysService();
 
     if ($response['status']) {
-        echo json_encode(['status' => true, 'data' => $response['data']]);
+        echo json_encode($response['data']);
     } else {
         http_response_code(500); // Internal Server Error
         echo json_encode(['status' => false, 'message' => $response['message']]);
@@ -78,7 +78,7 @@ function GetNextUpcomingHolidayController() {
     $response = GetNextUpcomingHolidayService();
 
     if ($response['status']) {
-        echo json_encode(['status' => true, 'data' => $response['data']]);
+        echo json_encode($response['data']);
     } else {
         http_response_code(404); // Not Found
         echo json_encode(['status' => false, 'message' => $response['message']]);

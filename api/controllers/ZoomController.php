@@ -90,10 +90,10 @@ function GetUpcomingZoomLinksController($input) {
     $response = GetUpcomingZoomLinksService($id);
 
     if ($response['status']) {
-        echo json_encode(['status' => true, 'data' => $response['data']]);
+        echo json_encode($response['data']);
     } else {
         http_response_code(500); // Internal Server Error
-        echo json_encode(['status' => false, 'message' => $response['message']]);
+        echo json_encode($response['message']);
     }
 }
 ?>

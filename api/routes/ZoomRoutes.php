@@ -34,8 +34,8 @@ function ZooomRoutes($method, $subpath) {
             break;
         
         case 'getUpcomingLinks': // Handle "ZoomLink/getUpcomingLinks"
-            if ($method === 'GET') {
-                GetUpcomingZoomLinksController();
+            if ($method === 'POST') {
+                GetUpcomingZoomLinksController($input);
             } else {
                 http_response_code(405);
                 echo json_encode(['message' => 'Method not allowed']);

@@ -78,8 +78,16 @@ function DeleteZoomLinkController($input) {
     }
 }
 
-function GetUpcomingZoomLinksController() {
-    $response = GetUpcomingZoomLinksService();
+function GetUpcomingZoomLinksController($input) {
+    if (!isset($input['s_id'])) {
+        http_response_code(400); // Bad Request
+        echo json_encode(['message' => 'Required field: id']);
+        return;
+    }
+
+    $id = $input['s_id'];
+
+    $response = GetUpcomingZoomLinksService($id);
 
     if ($response['status']) {
         echo json_encode(['status' => true, 'data' => $response['data']]);

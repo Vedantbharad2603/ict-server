@@ -44,11 +44,12 @@ function DeleteZoomLinkService($id) {
     }
 }
 
-function GetUpcomingZoomLinksService() {
+function GetUpcomingZoomLinksService($id) {
     global $conn;
 
     try {
-        $stmt = $conn->prepare("CALL GetUpcomingZoomLinks()");
+        $stmt = $conn->prepare("CALL GetUpcomingZoomLinks(?)");
+        $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
 

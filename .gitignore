@@ -2,6 +2,8 @@
 # db_connection.php
 # Api/
 Api/DB/db_connection.php
+# Web/
+Web/DB/db_connection.php
 
 # Ignore API key validator or authorization file
 # ApiKeyValidator.php

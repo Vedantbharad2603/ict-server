@@ -1,8 +1,6 @@
 <?php
-require '../api/db/db_connection.php';
-
-// Include the required library to generate Excel files (PhpSpreadsheet)
-require 'vendor/autoload.php';
+require '../db/db_connection.php';
+require '../vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -10,6 +8,9 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Color;
+
+$sql = "SELECT id, sem, edu_type FROM sem_info";
+$result = $conn->query($sql);
 
 try {
     // Function to increment column letters properly, even after Z (e.g., to AA, AB)
@@ -29,11 +30,24 @@ $subjectHeadingRow = 3;
 $TLheadingRow = $subjectHeadingRow+1;
 $otherHeadingRow = $TLheadingRow+1;
 $studentDataStartRow=$otherHeadingRow+1;
-
+$sem = '';
+$edu_type = '';
+$semId = '';
 
 
 // When the "Download" button is clicked
 if (isset($_POST['download'])) {
+    
+    $semId = $_POST['semId'];
+    $query = "SELECT sem, edu_type FROM sem_info WHERE id = $semId";
+    $res = $conn->query($query);
+    
+    if ($res->num_rows > 0) {
+        $row = $res->fetch_assoc();
+        $sem = $row['sem'];
+        $edu_type = $row['edu_type'];
+    }
+
     // Create a new Spreadsheet object
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -106,7 +120,7 @@ if (isset($_POST['download'])) {
         SELECT subject_info.short_name, subject_info.lec_type
         FROM subject_info
         JOIN sem_info ON subject_info.sem_info_id = sem_info.id
-        WHERE sem_info.sem = 7 AND sem_info.edu_type = 'degree'
+        WHERE sem_info.sem = $sem AND sem_info.edu_type = '$edu_type'
         order by subject_info.subject_name,subject_info.lec_type
     ";
 
@@ -196,7 +210,6 @@ if (isset($_POST['download'])) {
         ],
             ]);
 
-            // Move the column pointer ahead by 4 for the next subject
             $col = incrementColumn($tCol, 2);
         }
         
@@ -340,13 +353,13 @@ if (isset($_POST['download'])) {
     }
 
     // Fetch students in semester 7 (degree)
-$studentQuery = "
-SELECT student_info.id,student_info.first_name, student_info.last_name, student_info.enrollment_no, student_info.gr_no 
-FROM student_info 
-JOIN sem_info ON student_info.sem_info_id = sem_info.id
-WHERE sem_info.sem = 7 AND sem_info.edu_type = 'degree'
-ORDER BY student_info.gr_no
-";
+    $studentQuery = "
+    SELECT student_info.id,student_info.first_name, student_info.last_name, student_info.enrollment_no, student_info.gr_no 
+    FROM student_info 
+    JOIN sem_info ON student_info.sem_info_id = sem_info.id
+    WHERE sem_info.sem = $sem AND sem_info.edu_type = '$edu_type'
+    ORDER BY student_info.gr_no
+    ";
 $studentResult = mysqli_query($conn, $studentQuery);
 
 // Add student details and leave subject columns empty initially
@@ -425,48 +438,30 @@ while ($studentRow = mysqli_fetch_assoc($studentResult)) {
 
 
     $col = 'D';
-    // print_r($attendanceData);
     foreach ($attendanceData as $attendance) {
-        // print_r($attendance);
-        // print("<br>");
         $shortName = $attendance['short_name'];
         $sub_lec_type = $attendance['sub_lec_type'];
         $lecType = $attendance['lec_type'];
         $totalLec = $attendance['total_lec'];
         $attendLec = $attendance['attend_lec'];
 
-        // print("<br>While condition 1 = ");
-        // print($sheet->getCell($col . $subjectHeadingRow)->getValue());
-        // print("<br> Column = ");
-        // print($col);
-        // print("<br>");
         while($sheet->getCell($col . $TLheadingRow)->getValue() != '') 
          {
             $subjectHeader = $sheet->getCell($col . $subjectHeadingRow)->getValue();
-            // $tlHeader = $sheet->getCell($col . $TLheadingRow)->getValue();
-            // Print the subject header and short name
-            // printf($subjectHeader." ".$shortName."==>".$tlHeader." ".$lecType."<br>");
-        
+          
             if ($subjectHeader == $shortName) {
                if($sub_lec_type=="TL")
                 {
                     if($lecType=="L")
                     {
                         $sheet->setCellValue($col . $row, $totalLec); // Total for T
-                        // print($col . $row ." = ". $totalLec);
                         $sheet->setCellValue(incrementColumn($col) . $row, $attendLec); // Attend for T
-                        // print("--lab--");
-                        // print($col . $row ." = ". $attendLec);
-                        // print("<br>");
+                        
                     }
                     elseif($lecType=="T"){
                         $col = incrementColumn($col,2);
                         $sheet->setCellValue($col . $row, $totalLec); // Total for T
-                        // print($col . $row ." = ".$totalLec);
                         $sheet->setCellValue(incrementColumn($col) . $row, $attendLec); // Attend for T
-                        // print("--thoery--");
-                        // print($col . $row ." = ". $attendLec);
-                        // print("<br>");
                         $col = incrementColumn($col,2);
                     }
                     break;
@@ -474,11 +469,8 @@ while ($studentRow = mysqli_fetch_assoc($studentResult)) {
                 elseif($lecType=="L" || $lecType=="T")
                 {
                         $sheet->setCellValue($col . $row, $totalLec); // Total for T
-                        // print($col . $row ." = ".$totalLec);
                         $sheet->setCellValue(incrementColumn($col) . $row, $attendLec); // Attend for T
-                        // print("--lab / thoery--");
-                        // print($col . $row ." = ". $attendLec);
-                        // print("<br>");
+;
                         $col = incrementColumn($col,2);
                         break;
                 }
@@ -512,7 +504,7 @@ $sheet->getStyle('A5:' . incrementColumn($col,2) . ($row - 1))->applyFromArray([
 
     // At the end, save the Excel file
     $writer = new Xlsx($spreadsheet);
-    $fileName = 'Degree_Sem7_Attendance_('. date('d-m-Y') .').xlsx';
+    $fileName = $edu_type.'_Sem'.$sem.'_Attendance_('. date('d-m-Y') .').xlsx';
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $fileName . '"');
     header('Cache-Control: max-age=0');
@@ -525,22 +517,102 @@ $sheet->getStyle('A5:' . incrementColumn($col,2) . ($row - 1))->applyFromArray([
 $conn->close();
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Total Attendance Upload</title>
-</head>
-<body>
 
-<form method="post">
-    Sem - 7 : <button type="submit" name="download">Download</button>
-</form>
-<br><br>
-<form action="UploadTotalAttendance.php" method="post" enctype="multipart/form-data">
-    Select Excel file:
-    <input type="file" name="attendance_file" id="file">
-    <input type="submit" value="Upload File" name="submit">
-</form>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Attendance Upload</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert library -->
+
+    <style>
+        .sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-stone-800 p-5 flex">
+    <!-- Centered Text -->
+    <div class="flex-grow text-white text-lg font-bold text-center">
+        Total Attendance Sheet Upload
+    </div>
+    <!-- Hamburger Icon (Visible on small screens) -->
+    <div id="sidebarToggle" class="cursor-pointer text-white text-2xl ">
+        &#9776; <!-- Hamburger Icon -->
+    </div>
+</nav>
+
+
+    <!-- Include Sidebar -->
+    <?php include('./sidebar.php'); ?>
+
+    <!-- Centered Card Container -->
+    <div class="flex-grow flex items-center justify-center">
+        <div class="bg-white shadow-md rounded-2xl px-8 pt-6 pb-8 mb-4 max-w-lg w-full">
+            <!-- Form 1 -->
+            <form method="post" class="mb-6">
+                <div class="mb-4">
+                    <label for="semId" class="block text-gray-700 font-bold mb-2">Select Semester:</label>
+                    <select name="semId" id="semId" class="block w-full border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <?php
+                        if ($result->num_rows > 0) {
+                            // Output data for each row
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row['id'] . "'>" ." Sem - ".$row['sem'] . " - " . $row['edu_type'] . "</option>";
+                            }
+                        } else {
+                            echo "<option value=''>No data available</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <button type="submit" name="download" class="bg-blue-500 text-white font-bold py-2 px-10 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Download Sheet
+                </button>
+            </form>
+            <?php include('./UploadTotalAttendance.php'); ?>
+        </div>
+    </div>
+
+    <script>
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const closeSidebar = document.getElementById('closeSidebar');
+
+    // Open sidebar
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.add('open');
+        closeSidebar.classList.remove('hidden'); // Show close icon
+    });
+
+    // Close sidebar
+    closeSidebar.addEventListener('click', closeSidebarHandler);
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', (event) => {
+        if (!sidebar.contains(event.target) && event.target !== sidebarToggle) {
+            closeSidebarHandler();
+        }
+    });
+
+    function closeSidebarHandler() {
+        sidebar.classList.remove('open');
+        closeSidebar.classList.add('hidden'); // Hide close icon
+        sidebarToggle.classList.remove('hidden'); // Show hamburger icon
+    }
+</script>
+
 </body>
 </html>
-

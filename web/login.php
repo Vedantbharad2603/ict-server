@@ -44,7 +44,7 @@ session_start(); // Start the session
     </style>
 </head>
 <body class="flex items-center justify-center h-screen">
-    <img src="./assets/images/mu_logo.png" class="w-56 absolute top-4 right-4">
+    <img src="./assets/images/mu_logo_black.png" class="w-56 absolute top-4 right-4">
     <form action="login.php" method="POST" class="bg-white p-5 rounded-2xl shadow-2xl w-96">
         <center><img src="./assets/images/ict_logo.png" class="w-72"></center>
         <br>

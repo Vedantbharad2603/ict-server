@@ -46,28 +46,31 @@ session_start(); // Start the session
 <body class="flex items-center justify-center h-screen">
     <img src="./assets/images/mu_logo_black.png" class="w-56 absolute top-4 right-4">
     <form action="login.php" method="POST" class="bg-white p-5 rounded-2xl shadow-2xl w-96">
-        <center><img src="./assets/images/ict_logo.png" class="w-72"></center>
-        <br>
-        <div class="mb-4">
+    <center>
+        <img src="./assets/images/ict_logo.png" class="w-72">
+    </center>
+    <br>
+    <div class="mb-4">
         <input type="number" name="username" id="username" 
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 no-spinner"
-            placeholder="Enrollment No / EMP Code" required pattern="\d+" title="Username must be numbers only">
-        </div>
-        <div class="mb-4 relative">
-            <input type="password" name="password" id="password" 
-                class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                placeholder="Enter your password" required>
-                <br>
-            <button type="button" onclick="togglePassword()" 
-                class="absolute top-2 right-3 text-gray-500 focus:outline-none">
-                <span id="toggleIcon" class="text-cyan-500">Show</span>
-            </button>
-        </div>
-        <button type="submit" 
-            class="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400">
-            LOGIN
+            placeholder="Enrollment No / EMP Code" required pattern="\d+" title="Username must be numbers only" 
+            autocomplete="username">
+    </div>
+    <div class="mb-4 relative">
+        <input type="password" name="password" id="password" 
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            placeholder="Enter your password" required autocomplete="current-password">
+        <br>
+        <button type="button" onclick="togglePassword()" 
+            class="absolute top-2 right-3 text-gray-500 focus:outline-none">
+            <span id="toggleIcon" class="text-cyan-500">Show</span>
         </button>
-        <br><br>
+    </div>
+    <button type="submit" 
+        class="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400">
+        LOGIN
+    </button>
+    <br><br>
         <?php
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             require '../api/db/db_connection.php'; // Database connection

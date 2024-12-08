@@ -1,14 +1,44 @@
-<div id="sidebar" class="fixed top-0 right-0 w-72 h-full bg-white shadow-2xl sidebar">
-    <!-- Close Icon -->
-    <div 
-        id="closeSidebar" 
-        class="absolute -left-10 top-4 bg-red-600 h-10 w-10 text-center cursor-pointer text-white rounded-l-xl text-2xl hidden transition">
-        &times; <!-- Close (X) Icon -->
-    </div>
-    <div class="bg-zinc-700 h-full flex flex-col justify-between">
+<?php
+session_start();
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'faculty') {
+    header("Location: ../login.php");
+    exit();
+}
+
+$userdata = $_SESSION['userdata'];
+$user = $_SESSION['user'];
+
+// Check if the image URL is already stored in the session
+if (!isset($_SESSION['image_url'])) {
+    // Generate and store the image URL in session
+    $imageUrl = "https://marwadieducation.edu.in/MEFOnline/handler/getImage.ashx?Id=" . htmlspecialchars($user['username']);
+    $_SESSION['image_url'] = $imageUrl;
+} else {
+    // Use the stored image URL
+    $imageUrl = $_SESSION['image_url'];
+}
+?>
+
+<div id="sidebar" class="sidebar h-screen w-1/6 bg-zinc-800 shadow-xl shadow-gray-400 text-white flex flex-col">
+    <div class="flex flex-col justify-between h-full">
         <div>
-            <div class="p-6 bg-zinc-800">
-                <img src="../assets/images/mu_logo_white.png" class="w-56 top-4 right-4">
+            <div class="p-6 bg-zinc-950 flex flex-row">
+                <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                    <img 
+                        class="w-full h-full object-cover" 
+                        src="<?php echo $imageUrl; ?>" 
+                        alt="Faculty Image"
+                        onerror="this.onerror=null; this.src='../assets/images/favicon.png';">
+                </div>
+                <div class="pl-3">
+                    <span class="block text-md font-medium">
+                        <?php echo($userdata['first_name'] . " " . $userdata['last_name']); ?>
+                    </span>
+                    <span class="block text-sm text-gray-400">
+                        <?php echo($userdata['designation'] == "hod" ? "HOD-ICT" : "Faculty"); ?>
+                    </span>
+                </div>
             </div>
             <ul>
                 <li>
@@ -21,7 +51,7 @@
                 <li>
                     <a href="total_attendance_sheet.php">
                         <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
-                            Student Total Attendance
+                            Students Total Attendance
                         </div>
                     </a>
                 </li>
@@ -43,3 +73,4 @@
         </form>
     </div>
 </div>
+            

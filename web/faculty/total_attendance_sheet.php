@@ -526,46 +526,27 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Total Attendance Upload</title>
-    <!-- Tailwind CSS CDN -->
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert library -->
-
-    <style>
-        .sidebar {
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-        }
-        .sidebar.open {
-            transform: translateX(0);
-        }
-    </style>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
-
-    <!-- Navbar -->
-    <nav class="bg-stone-800 p-5 flex">
-    <!-- Centered Text -->
-    <div class="flex-grow text-white text-lg font-bold text-center">
-        Total Attendance Sheet Upload
-    </div>
-    <!-- Hamburger Icon (Visible on small screens) -->
-    <div id="sidebarToggle" class="cursor-pointer text-white text-2xl ">
-        &#9776; <!-- Hamburger Icon -->
-    </div>
-</nav>
-
-
-    <!-- Include Sidebar -->
+<body class="bg-gray-100 text-gray-800 flex">
+    
     <?php include('./sidebar.php'); ?>
 
     <!-- Centered Card Container -->
-    <div class="flex-grow flex items-center justify-center">
-        <div class="bg-white shadow-md rounded-2xl px-8 pt-6 pb-8 mb-4 max-w-lg w-full">
+    <div class="flex-1 items-center justify-center">
+    <?php 
+    $page_title = "Students Total Attendance";
+    include('./navbar.php'); 
+    ?>
+        <div class="p-12">
+        <div class="bg-white shadow-lg rounded-2xl p-10 mb-4 max-w-xl w-full">
             <!-- Form 1 -->
-            <form method="post" class="mb-6">
+            <form method="post">
                 <div class="mb-4">
                     <label for="semId" class="block text-gray-700 font-bold mb-2">Select Semester:</label>
-                    <select name="semId" id="semId" class="block w-full border rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="semId" id="semId" class="block w-full border-2 rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <?php
                         if ($result->num_rows > 0) {
                             // Output data for each row
@@ -578,41 +559,19 @@ $conn->close();
                         ?>
                     </select>
                 </div>
-                <button type="submit" name="download" class="bg-blue-500 text-white font-bold py-2 px-10 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" name="download" class="bg-blue-500 text-white font-bold py-2 px-10 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     Download Sheet
                 </button>
             </form>
+           
+        </div>
+
+        <div class="bg-white shadow-lg rounded-2xl p-10 mb-4 max-w-xl w-full">
             <?php include('./UploadTotalAttendance.php'); ?>
         </div>
+        </div>
+
     </div>
-
-    <script>
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-    const closeSidebar = document.getElementById('closeSidebar');
-
-    // Open sidebar
-    sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        closeSidebar.classList.remove('hidden'); // Show close icon
-    });
-
-    // Close sidebar
-    closeSidebar.addEventListener('click', closeSidebarHandler);
-
-    // Close sidebar when clicking outside
-    document.addEventListener('click', (event) => {
-        if (!sidebar.contains(event.target) && event.target !== sidebarToggle) {
-            closeSidebarHandler();
-        }
-    });
-
-    function closeSidebarHandler() {
-        sidebar.classList.remove('open');
-        closeSidebar.classList.add('hidden'); // Hide close icon
-        sidebarToggle.classList.remove('hidden'); // Show hamburger icon
-    }
-</script>
 
 </body>
 </html>

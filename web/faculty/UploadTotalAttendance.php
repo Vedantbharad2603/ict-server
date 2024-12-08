@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <title>Upload Total Attendance</title>
 
 </head>
@@ -197,11 +198,11 @@ $conn->close();
 
 <body>
     <!-- Form 2 -->
-    <form  method="post" enctype="multipart/form-data" class="mt-6">
+    <form  method="post" enctype="multipart/form-data">
                 <div class="mb-4">
-                    <label for="file" class="block text-gray-700 font-bold mb-2">Select Excel file:</label>
+                    <label for="file" class="block text-gray-700 font-bold mb-2">Select Excel file to upload:</label>
                     <input type="file" name="attendance_file" id="file" required
-                        class="block w-full text-gray-700 border rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        class="block w-full text-gray-700 border-2 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                 </div>
                 <input type="submit" value="Upload Sheet" name="submit" 
                     class="bg-cyan-500 text-white font-bold py-2 px-10 rounded hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition">

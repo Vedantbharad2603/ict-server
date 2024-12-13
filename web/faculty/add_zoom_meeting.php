@@ -93,7 +93,7 @@
 
             <div class="p-6">
                 <!-- Add/Edit Meeting Popup Trigger -->
-                <button onclick="openAddEditPopup()" class="bg-blue-500 text-white p-2 rounded mb-6">Add Meeting</button>
+                <button onclick="openAddEditPopup()" class="bg-cyan-500 text-white p-2 rounded mb-6 hover:bg-cyan-600">Add Meeting</button>
 
                 <!-- Meetings Table -->
                 <table class="min-w-full bg-white border border-gray-300 rounded">

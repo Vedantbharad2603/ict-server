@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="p-6">
     <!-- Add/Edit Holiday Popup Trigger -->
-    <button onclick="openAddEditPopup()" class="bg-blue-500 text-white p-2 rounded mb-6">Add Holiday</button>
+    <button onclick="openAddEditPopup()" class="bg-cyan-500 text-white p-2 hover:bg-cyan-600 rounded mb-6">Add Holiday</button>
 
     <!-- Holidays Table -->
     <table class="min-w-full bg-white border border-gray-300 rounded">

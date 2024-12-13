@@ -76,6 +76,14 @@ if (!isset($_SESSION['image_url'])) {
                 </li>
 
                 <li>
+                    <a href="add_zoom_meeting.php">
+                        <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                            Parents Meeting
+                        </div>
+                    </a>
+                </li>
+
+                <li>
                     <a href="total_attendance_sheet.php">
                         <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
                             Students Total Attendance

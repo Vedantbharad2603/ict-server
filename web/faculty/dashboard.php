@@ -13,15 +13,13 @@
 <?php include('./sidebar.php'); ?>
 
 <!-- Main Content -->
-<div class="main-content flex-1">
+<div class="main-content  pl-64  flex-1">
 
 <?php
 $page_title = "Dashboard";
 include('./navbar.php');
 ?>
-
-
-    <div class="p-6">
+    <div class="p-6 ">
         <h1 class="text-2xl font-bold mb-4">Welcome to Faculty Dashboard</h1>
         <div class="bg-white shadow-md rounded-lg p-6">
             <p><strong>Faculty ID:</strong> <?php echo htmlspecialchars($userdata['faculty_id']); ?></p>

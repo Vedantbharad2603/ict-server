@@ -535,7 +535,7 @@ $conn->close();
     <?php include('./sidebar.php'); ?>
 
     <!-- Centered Card Container -->
-    <div class="flex-1 items-center justify-center">
+    <div class="flex-1  pl-64  items-center justify-center">
     <?php 
     $page_title = "Students Total Attendance";
     include('./navbar.php'); 

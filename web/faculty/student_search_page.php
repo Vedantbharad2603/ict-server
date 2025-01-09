@@ -27,9 +27,9 @@
 
             <!-- Search Bar and Button -->
             <form class="flex justify-center space-x-4 mb-6" onsubmit="event.preventDefault(); searchStudentInfo();">
-                <input type="text" id="enrollment_no" class="w-80 p-3 border border-gray-300 rounded-md text-gray-800"
+                <input type="text" id="enrollment_no" class="w-80 p-3 border border-gray-300 rounded-full text-gray-800"
                     placeholder="Enter Enrollment No." maxlength="12" oninput="validateInput(event)" required />
-                <button id="search_btn" class="bg-cyan-500 text-white px-6 py-3 rounded-md shadow-lg hover:bg-cyan-600 focus:outline-none" type="submit">
+                    <button id="search_btn" class="bg-cyan-500 text-white px-6 py-3 hover:px-10 transition-all rounded-full shadow-lg hover:bg-cyan-600 focus:outline-none" type="submit">
                     Search
                 </button>
             </form>

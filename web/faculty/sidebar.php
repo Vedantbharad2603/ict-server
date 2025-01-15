@@ -91,6 +91,15 @@ if (!isset($_SESSION['image_url'])) {
                     </a>
                 </li>
 
+               <?php if ($userdata['designation'] === 'hod'): ?>
+                    <li>
+                        <a href="manage_class.php">
+                            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                                Manage Class
+                            </div>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
             </ul>
         </div>

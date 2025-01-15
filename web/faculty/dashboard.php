@@ -21,7 +21,7 @@ $page_title = "Dashboard";
 include('./navbar.php');
 
 // Connect to the database
-include('../db/db_connection.php');
+include('../../api/db/db_connection.php');
 
 // Query to get the total number of holidays
 $holiday_query = "SELECT COUNT(*) AS total_holidays FROM holiday_info";

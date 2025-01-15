@@ -1,6 +1,6 @@
 <?php
 // Include the database connection file
-include('../db/db_connection.php');
+include('../../api/db/db_connection.php');
 
 $student_data = [];
 $attendance_data = [];

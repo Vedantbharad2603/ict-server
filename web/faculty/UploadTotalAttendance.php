@@ -9,7 +9,7 @@
 
 </head>
 <?php
-require '../db/db_connection.php';
+require '../../api/db/db_connection.php';
 require '../vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\IOFactory;

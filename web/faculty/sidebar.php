@@ -47,61 +47,120 @@ if (!isset($_SESSION['image_url'])) {
 
                 </div>
             </div>
-            <ul>
+           <ul>
+    <!-- Existing Menu Items -->
+    <li>
+        <a href="dashboard.php">
+            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                Dashboard
+            </div>
+        </a>
+    </li>
 
-                <li>
-                    <a href="dashboard.php">
-                        <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
-                            Dashboard
-                        </div>
-                    </a>
-                </li>
+    <?php if ($userdata['designation'] === 'hod'): ?>
+        <li>
+            <a href="holiday.php">
+                <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                    Holidays
+                </div>
+            </a>
+        </li>
+    <?php endif; ?>
 
-                <?php if ($userdata['designation'] === 'hod'): ?>
-                    <li>
-                        <a href="holiday.php">
-                            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
-                                Holidays
-                            </div>
-                        </a>
-                    </li>
-                <?php endif; ?>
+    <li>
+        <a href="student_search_page.php">
+            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                Student Search
+            </div>
+        </a>
+    </li>
 
-                <li>
-                    <a href="student_search_page.php">
-                        <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
-                            Student Search
-                        </div>
-                    </a>
-                </li>
+    <li>
+        <a href="add_zoom_meeting.php">
+            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                Parents Meeting
+            </div>
+        </a>
+    </li>
 
-                <li>
-                    <a href="add_zoom_meeting.php">
-                        <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
-                            Parents Meeting
-                        </div>
-                    </a>
-                </li>
+    <li>
+        <a href="total_attendance_sheet.php">
+            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                Students Total Attendance
+            </div>
+        </a>
+    </li>
 
-                <li>
-                    <a href="total_attendance_sheet.php">
-                        <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
-                            Students Total Attendance
-                        </div>
-                    </a>
-                </li>
+    <?php if ($userdata['designation'] === 'hod'): ?>
+        <li>
+            <a href="manage_class.php">
+                <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                    Manage Class
+                </div>
+            </a>
+        </li>
+    <?php endif; ?>
 
-               <?php if ($userdata['designation'] === 'hod'): ?>
-                    <li>
-                        <a href="manage_class.php">
-                            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
-                                Manage Class
-                            </div>
-                        </a>
-                    </li>
-                <?php endif; ?>
+    
+    <!-- New Placement Dropdown -->
+    <li class="relative">
+    <div 
+        id="placement-box"
+        class="transition-all w-full h-12 flex items-center justify-between px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900 cursor-pointer" 
+        onclick="toggleDropdown('placement-dropdown', 'placement-box', 'arrow-icon')">
+        <span>Placement</span>
+        <span id="arrow-icon" class="transition-transform text-xs ">&#9660;</span> <!-- Smaller down arrow -->
+    </div>
+    <ul id="placement-dropdown" class="pl-5 hidden opacity-0 transform translate-y-5 transition-all duration-300 bg-zinc-800 text-white shadow-lg z-10 w-full">
+        <li>
+            <a href="companies.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 transition">Companies</a>
+        </li>
+        <li>
+            <a href="company_rounds.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600  transition"">Company Rounds</a>
+        </li>
+        <li>
+            <a href="student_rounds.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 transition"">Student Rounds</a>
+        </li>
+        <li>
+            <a href="placed_students.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 transition"">Placed Students</a>
+        </li>
+    </ul>
+</li>
 
-            </ul>
+<script>
+    function toggleDropdown(dropdownId, boxId, arrowId) {
+        const dropdown = document.getElementById(dropdownId);
+        const box = document.getElementById(boxId);
+        const arrow = document.getElementById(arrowId);
+
+        // Toggle dropdown visibility and animation
+        if (dropdown.classList.contains('hidden')) {
+            dropdown.classList.remove('hidden');
+            setTimeout(() => {
+                dropdown.classList.remove('opacity-0', 'translate-y-5');
+                dropdown.classList.add('opacity-100', 'translate-y-0');
+            }, 10); // Allow DOM update
+
+            // Rotate arrow up
+            arrow.style.transform = "rotate(180deg)";
+        } else {
+            dropdown.classList.add('opacity-0', 'translate-y-5');
+            dropdown.classList.remove('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                dropdown.classList.add('hidden');
+            }, 300); // Matches transition duration
+
+            // Rotate arrow down
+            arrow.style.transform = "rotate(0deg)";
+        }
+
+        // Add or remove border for the clicked box
+        box.classList.toggle('border');
+        box.classList.toggle('border-red-600');
+    }
+</script>
+
+
         </div>
 
         <!-- Logout Button -->

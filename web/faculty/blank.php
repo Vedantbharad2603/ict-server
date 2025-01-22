@@ -21,5 +21,6 @@ include('../../api/db/db_connection.php');?>
             $page_title = "Companies";
             include('./navbar.php');
             ?>
+            
 </body>
 </html>

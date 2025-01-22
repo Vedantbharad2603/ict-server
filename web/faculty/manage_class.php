@@ -131,11 +131,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
             if (mysqli_num_rows($sem_result) > 0) {
                 while ($sem_row = mysqli_fetch_assoc($sem_result)) {
                     echo "
-                    <div class='bg-gray-300 rounded transition-all text-gray-800 p-2 pl-4 hover:pl-8 hover:bg-cyan-600/75 hover:text-white cursor-pointer' onclick='fetchClassInfo({$sem_row['id']}, this)'>
+                    <div class='bg-white pl-5 shadow-xl rounded-xl p-3  hover:pl-10  hover:shadow-2xl transition-all cursor-pointer' onclick='fetchClassInfo({$sem_row['id']}, this)'>
                         <div class='flex justify-between items-center'>
                             <h3 class='text-md font-bold'>Sem : {$sem_row['sem']} - " . strtoupper($sem_row['edu_type']) . "</h3>
                             <button 
-                                class='transition-all bg-gray-200 text-green-600 mr-4 font-bold text-sm px-4 py-1 rounded hover:scale-110' 
+                                class='transition-all bg-gray-100 drop-shadow-lg text-green-600 mr-4 font-bold text-sm px-4 py-1 rounded-lg hover:scale-110' 
                                 onclick='event.stopPropagation(); openCreateClassPopup({$sem_row['id']}, \"{$sem_row['sem']}\", \"" . strtoupper($sem_row['edu_type']) . "\")'>
                                 Create Class
                             </button>
@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
                     let classInfoHtml = '<ul>';
                     responseData.classes.forEach(classItem => {
                         classInfoHtml += `
-                            <li class="bg-gray-200 transition-all text-gray-600 p-2 mb-2 pl-4 mr-8 hover:pl-8 rounded-xl">
+                            <li class="bg-gray-100 border-2 transition-all text-gray-600 p-2 mb-2 pl-4 mr-8 hover:pl-8 rounded-xl">
                                 <div class="flex justify-between items-center">
                                     <h3 class="text-md text-gray-600 font-semibold">
                                         ${classItem.classname} - ${classItem.batch.toUpperCase()} - ${classItem.faculty_name}
@@ -224,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
                     classInfoHtml += '</ul>';
                     classListDiv.html(classInfoHtml);
                 } else {
-                    classListDiv.html('<p class="text-sm text-gray-500">No classes found for this semester.</p>');
+                    classListDiv.html('<p class="text-sm text-white-500">No classes found for this semester.</p>');
                 }
 
                 classListDiv.stop().slideToggle(200);

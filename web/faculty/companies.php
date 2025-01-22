@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company_name'], $_POS
         // Update an existing company
         $update_query = "UPDATE company_info SET company_name = '$company_name', company_type = '$company_type', company_website = '$company_website', company_linkedin = '$company_linkedin' WHERE id = $company_id";
         if (mysqli_query($conn, $update_query)) {
+            // Redirect to the same page to avoid resubmission on refresh
             header('Location: companies.php?status=updated');
             exit;
         }
@@ -20,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company_name'], $_POS
         // Add a new company
         $insert_query = "INSERT INTO company_info (company_name, company_type, company_website, company_linkedin) VALUES ('$company_name', '$company_type', '$company_website', '$company_linkedin')";
         if (mysqli_query($conn, $insert_query)) {
+            // Redirect to the same page to avoid resubmission on refresh
             header('Location: companies.php?status=added');
             exit;
         }
@@ -87,8 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company_name'], $_POS
             
             <!-- Search bar for real-time search -->
             <div class="mb-4">
-                <button onclick="openAddEditPopup()" class="bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full mb-6 transition-all">Add company</button>
-                <input type="text" id="search" class="border-2 ml-10 pl-4 p-2 rounded-full w-1/2" placeholder="Search Companies..." onkeyup="searchTable()">
+                <button onclick="openAddEditPopup()" class="drop-shadow-md bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full mb-6 transition-all">Add Company</button>
+                <input type="text" id="search" class="drop-shadow-md border-2 ml-10 pl-4 p-2 rounded-full w-1/2" placeholder="Search Companies..." onkeyup="searchTable()">
             </div>
 
             <form id="company-table-form" class="rounded-lg" method="POST">
@@ -127,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company_name'], $_POS
                                 if (!empty($row['company_linkedin'])) {
                                     echo "<a href='{$row['company_linkedin']}' target='_blank' class='linkedin-btn inline-block px-4 py-1 bg-transparent text-blue-600 border border-blue-600 rounded-full transition hover:bg-blue-600 hover:text-white'>LinkedIn</a>";
                                 } else {
-                                    echo "<button class='inline-block px-4 py-1 text-gray-500 border border-gray-500 rounded-full cursor-not-allowed'>LinkedIn</button>";
+                                    echo "<div class='inline-block px-4 py-1 text-gray-500 border border-gray-500 rounded-full cursor-not-allowed'>LinkedIn</div>";
                                 }
                                 echo "</td>
                                 <td class='border px-4 py-2 text-center'>

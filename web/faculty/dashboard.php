@@ -59,6 +59,14 @@ if ($student_count_result && $row = $student_count_result->fetch_assoc()) {
     $total_students = $row['total_students'];
 }
 
+// Query to get the total number of companies
+$company_count_query = "SELECT COUNT(*) AS total_companies FROM company_info";
+$company_count_result = $conn->query($company_count_query);
+$total_companies = 0;
+if ($company_count_result && $row = $company_count_result->fetch_assoc()) {
+    $total_companies = $row['total_companies'];
+}
+
 // Query to get the total number of faculties
 $faculty_count_query = "SELECT COUNT(*) AS total_faculties FROM faculty_info";
 $faculty_count_result = $conn->query($faculty_count_query);
@@ -93,6 +101,15 @@ if ($faculty_count_result && $row = $faculty_count_result->fetch_assoc()) {
                 class="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform hover:scale-105 cursor-pointer">
                 <h2 class="text-xl font-semibold mb-2">Total Faculties</h2>
                 <p id="faculty-count" class="text-4xl font-bold text-cyan-500">0</p>
+            </div>
+
+            <!-- Total Companies Card -->
+            <div 
+                class="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform hover:scale-105 cursor-pointer"
+                onclick="window.location.href='companies.php';"
+            >
+                <h2 class="text-xl font-semibold mb-2">Total Companies</h2>
+                <p id="company-count" class="text-4xl font-bold text-cyan-500">0</p>
             </div>
         </div>
 
@@ -130,11 +147,15 @@ if ($faculty_count_result && $row = $faculty_count_result->fetch_assoc()) {
 
     // Animate Total Students Count
     const totalStudents = <?php echo $total_students; ?>;
-    countUp('student-count', 0, totalStudents, 1500);
+    countUp('student-count', 0, totalStudents, 1000);
 
     // Animate Total Faculties Count
     const totalFaculties = <?php echo $total_faculties; ?>;
-    countUp('faculty-count', 0, totalFaculties, 1500);
+    countUp('faculty-count', 0, totalFaculties, 1000);
+
+    // Animate Holiday Count
+    const totalCompanies = <?php echo $total_companies; ?>;
+    countUp('company-count', 0, totalCompanies, 1000);
 
     // Bar Chart Data
     const studentData = <?php echo json_encode($student_data); ?>;

@@ -103,29 +103,31 @@ if (!isset($_SESSION['image_url'])) {
 
     
     <!-- New Placement Dropdown -->
-    <li class="relative">
-    <div 
-        id="placement-box"
-        class="transition-all w-full h-12 flex items-center justify-between px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900 cursor-pointer" 
-        onclick="toggleDropdown('placement-dropdown', 'placement-box', 'arrow-icon')">
-        <span>Placement</span>
-        <span id="arrow-icon" class="transition-transform text-xs ">&#9660;</span> <!-- Smaller down arrow -->
-    </div>
-    <ul id="placement-dropdown" class="pl-5 hidden opacity-0 transform translate-y-5 transition-all duration-300 bg-zinc-800 text-white shadow-lg z-10 w-full">
-        <li>
-            <a href="companies.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 transition">Companies</a>
-        </li>
-        <li>
-            <a href="company_rounds.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600  transition"">Company Rounds</a>
-        </li>
-        <li>
-            <a href="student_rounds.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 transition"">Student Rounds</a>
-        </li>
-        <li>
-            <a href="placed_students.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 transition"">Placed Students</a>
-        </li>
-    </ul>
-</li>
+    <?php if ($userdata['designation'] === 'hod'): ?>
+        <li class="relative">
+        <div 
+            id="placement-box"
+            class="transition-all w-full h-12 flex items-center justify-between px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900 cursor-pointer" 
+            onclick="toggleDropdown('placement-dropdown', 'placement-box', 'arrow-icon')">
+            <span>Placement</span>
+            <span id="arrow-icon" class="transition-transform text-xs ">&#9660;</span> <!-- Smaller down arrow -->
+        </div>
+        <ul id="placement-dropdown" class="pl-5 hidden opacity-0 transform translate-y-5 transition-all duration-300 bg-zinc-800 text-white shadow-lg z-10 w-full">
+            <li>
+                <a href="companies.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Companies</a>
+            </li>
+            <li>
+                <a href="campus_drive.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Campus Drive</a>
+            </li>
+            <li>
+                <a href="student_rounds.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Student Rounds</a>
+            </li>
+            <li>
+                <a href="placed_students.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Placed Students</a>
+            </li>
+        </ul>
+    </li>
+    <?php endif; ?>
 
 <script>
     function toggleDropdown(dropdownId, boxId, arrowId) {
@@ -155,8 +157,8 @@ if (!isset($_SESSION['image_url'])) {
         }
 
         // Add or remove border for the clicked box
-        box.classList.toggle('border');
-        box.classList.toggle('border-red-600');
+        box.classList.toggle('bg');
+        box.classList.toggle('bg-red-600');
     }
 </script>
 

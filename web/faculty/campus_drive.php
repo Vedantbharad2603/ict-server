@@ -2,7 +2,7 @@
 include('../../api/db/db_connection.php');
 
 // Fetch all companies
-$companies_query = "SELECT cmi.id, cmi.company_name, cpi.date, cpi.time FROM campus_placement_info cpi JOIN company_info cmi ON cpi.company_info_id = cmi.id";
+$companies_query = "SELECT cpi.id as driveId,cmi.id, cmi.company_name, cpi.date, cpi.time FROM campus_placement_info cpi JOIN company_info cmi ON cpi.company_info_id = cmi.id";
 $companies_result = mysqli_query($conn, $companies_query);
 
 // Fetch all batches
@@ -30,7 +30,7 @@ function getPlacementsByBatch($batch_id) {
 // Handle AJAX request for companies by batch
 if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
     $batch_id = intval($_GET['batch_id']);
-    $companies_query = "SELECT cmi.id, cmi.company_name, cpi.date, cpi.time 
+    $companies_query = "SELECT cpi.id as driveId,cmi.id, cmi.company_name, cpi.date, cpi.time 
                          FROM campus_placement_info cpi 
                          JOIN company_info cmi ON cpi.company_info_id = cmi.id
                          WHERE cpi.batch_info_id = $batch_id";
@@ -38,8 +38,8 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
     
     if (mysqli_num_rows($companies_result) > 0) {
         while ($company = mysqli_fetch_assoc($companies_result)): ?>
-            <div class="company-item bg-white shadow-xl rounded-xl pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?company_id=<?php echo $company['id']; ?>'">
-                <div class="flex justify-between items-center cursor-pointer toggle-rounds" data-company-id="<?php echo $company['id']; ?>">
+            <div class="company-item bg-white shadow-xl rounded-xl pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?drive_id=<?php echo $company['driveId']; ?>'">
+                <div class="flex justify-between items-center cursor-pointer toggle-rounds" data-company-id="<?php echo $company['driveId']; ?>">
                     <div class="flex items-center">
                         <h2 class="text-lg font-bold mr-2"><?php echo $company['company_name']; ?> </h2>
                         <span> - - | - - <strong>Date & Time: </strong>
@@ -85,8 +85,8 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
         <div class="container mx-auto p-6">
             <!-- Add Campus Drive Button and Search Bar -->
             <div class="mb-4 flex items-center">
-                <button onclick="openAddEditPopup()" class="drop-shadow-md bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full mb-4 transition-all">Add Campus Drive</button>
-                
+            <button onclick="window.location.href='add_campus_drive.php';" class="drop-shadow-md bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full mb-4 transition-all">Add Campus Drive</button>
+
                 <!-- Search Bar -->
                 <input type="text" id="search" class="ml-10 drop-shadow-md border-2 pl-4 p-2 rounded-full w-1/2 mb-4" placeholder="Search Companies..." onkeyup="searchCompanies()">
                 
@@ -107,8 +107,8 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
             <!-- Display Companies -->
             <div id="companies-grid" class="grid grid-cols-1 gap-3">
                 <?php while ($company = mysqli_fetch_assoc($companies_result)): ?>
-                    <div class="company-item bg-white shadow-xl rounded-xl pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?company_id=<?php echo $company['id']; ?>'">
-                        <div class="flex justify-between items-center cursor-pointer toggle-rounds" data-company-id="<?php echo $company['id']; ?>">
+                    <div class="company-item bg-white shadow-xl rounded-xl pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?drive_id=<?php echo $company['driveId']; ?>'">
+                        <div class="flex justify-between items-center cursor-pointer toggle-rounds" data-company-id="<?php echo $company['driveId']; ?>">
                             <div class="flex items-center">
                             <h2 class="text-lg font-bold mr-2"><?php echo $company['company_name']; ?> </h2>
                             <span> - - | - - <strong>Date & Time: </strong> 

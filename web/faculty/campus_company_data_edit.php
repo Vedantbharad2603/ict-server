@@ -2,9 +2,10 @@
 include('../../api/db/db_connection.php');
 
 // Function to fetch rounds for a company
-function getCompanyRounds($company_id) {
+function getCompanyRounds($drive_id)
+{
     global $conn;
-    $query = "SELECT * FROM company_rounds_info WHERE company_info_id = $company_id ORDER BY round_index";
+    $query = "SELECT * FROM company_rounds_info WHERE campus_placement_info_id = $drive_id ORDER BY round_index";
     $result = mysqli_query($conn, $query);
     $rounds = [];
     while ($row = mysqli_fetch_assoc($result)) {
@@ -14,15 +15,54 @@ function getCompanyRounds($company_id) {
 }
 
 // Function to fetch mode options (Offline/Online)
-function getModeOptions() {
+function getModeOptions()
+{
     return [
         'offline' => 'Offline',
         'online' => 'Online'
     ];
 }
 
+
+// Function to handle the deletion of a round
+function deleteRound($roundId)
+{
+    global $conn; // Access the database connection
+
+    // SQL query to delete the round
+    $delete_rounds_query = "DELETE FROM company_rounds_info WHERE id = ?";
+
+    // Prepare the SQL query
+    if ($stmt = mysqli_prepare($conn, $delete_rounds_query)) {
+        // Bind the round ID to the query
+        mysqli_stmt_bind_param($stmt, "i", $roundId);
+
+        // Execute the query
+        if (mysqli_stmt_execute($stmt)) {
+            return "success"; // Return success if the query executed correctly
+        } else {
+            return "error"; // Return error if something went wrong
+        }
+    } else {
+        return "error"; // Return error if the query couldn't be prepared
+    }
+}
+
+// Handle the deletion when an AJAX request is made
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id'])) {
+    $roundId = $_POST['id'];
+
+    // Call the deleteRound function
+    $result = deleteRound($roundId);
+
+    // Return the result of the deletion attempt
+    echo $result;
+    exit;
+}
+
 // Fetch all batches for the dropdown
-function getBatches() {
+function getBatches()
+{
     global $conn;
     $query = "SELECT id, batch_start_year, batch_end_year FROM batch_info ORDER BY batch_start_year ASC";
     $result = mysqli_query($conn, $query);
@@ -35,17 +75,17 @@ function getBatches() {
 
 $batches = getBatches();
 
-// Check if company_id is passed in the URL
+// Check if drive_id is passed in the URL
 
-if (isset($_GET['company_id'])) {
-    $company_id = intval($_GET['company_id']);
+if (isset($_GET['drive_id'])) {
+    $drive_id = intval($_GET['drive_id']);
 
     // Fetch company information
     $company_query = "SELECT cmi.id as companyId, cmi.company_name, cpi.*, bi.id as batch_id, bi.batch_start_year, bi.batch_end_year
                       FROM campus_placement_info cpi
                       JOIN company_info cmi ON cpi.company_info_id = cmi.id
                       JOIN batch_info bi ON cpi.batch_info_id = bi.id
-                      WHERE cmi.id = $company_id;";
+                      WHERE cpi.id = $drive_id;";
     $company_result = mysqli_query($conn, $company_query);
     $company = mysqli_fetch_assoc($company_result);
 
@@ -54,7 +94,7 @@ if (isset($_GET['company_id'])) {
     }
 
     // Fetch rounds for the company
-    $rounds = getCompanyRounds($company_id);
+    $rounds = getCompanyRounds($drive_id);
 } else {
     die("Company ID is missing.");
 }
@@ -62,6 +102,7 @@ if (isset($_GET['company_id'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -70,7 +111,9 @@ if (isset($_GET['company_id'])) {
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
 </head>
+
 <body class="bg-gray-100 text-gray-800 flex h-screen overflow-hidden">
     <?php include('./sidebar.php'); ?>
     <div class="main-content pl-64 flex-1 ml-1/6 overflow-y-auto">
@@ -78,6 +121,7 @@ if (isset($_GET['company_id'])) {
         $page_title = "Edit Campus Details";
         include('./navbar.php');
 
+    
         // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $date = !empty($_POST['date']) ? $_POST['date'] : null;
@@ -92,7 +136,7 @@ if (isset($_GET['company_id'])) {
             $round_modes = $_POST['round_modes']; // Modes for each round
             $round_indices = $_POST['round_index']; // Round indices
             $existing_round_ids = array_keys($round_indices); // Round IDs in the database
-        
+
             // Update campus placement info
             $update_query = "UPDATE campus_placement_info 
                              SET date = " . ($date ? "'$date'" : "NULL") . ", 
@@ -102,16 +146,15 @@ if (isset($_GET['company_id'])) {
                                  package = '$package', 
                                  other_info = '$other_info',
                                  batch_info_id = $batch_id
-                             WHERE company_info_id = $company_id";
-        
+                             WHERE id = $drive_id";
+
             if (mysqli_query($conn, $update_query)) {
                 // Delete selected rounds
                 if (!empty($rounds_to_delete)) {
                     $rounds_to_delete_ids = implode(",", array_map('intval', $rounds_to_delete));
-                    $delete_rounds_query = "DELETE FROM company_rounds_info WHERE id IN ($rounds_to_delete_ids) AND company_info_id = $company_id";
+                    $delete_rounds_query = "DELETE FROM company_rounds_info WHERE id IN ($rounds_to_delete_ids) AND campus_placement_info_id = $drive_id";
                     mysqli_query($conn, $delete_rounds_query);
                 }
-        
                 // Update existing rounds
                 foreach ($existing_round_ids as $index => $round_id) {
                     if (strpos($round_id, 'new-') === false) { // Ensure we don't update new rounds
@@ -119,30 +162,30 @@ if (isset($_GET['company_id'])) {
                         $mode = $round_modes[$round_id];
                         $index = $round_indices[$round_id];
                         $update_round_query = "UPDATE company_rounds_info 
-                                               SET round_name = '$name', mode = '$mode', round_index = $index+1 
+                                               SET round_name = '$name', mode = '$mode', round_index = $index
                                                WHERE id = $round_id";
                         mysqli_query($conn, $update_round_query);
                     }
                 }
-        
+
                 // Insert new rounds
                 foreach ($_POST['round_names'] as $round_key => $round_name) {
                     if (strpos($round_key, 'new-') === 0) { // Check if it's a new round
                         $mode = $_POST['round_modes'][$round_key];
                         $index = $_POST['round_index'][$round_key];
-                        $insert_round_query = "INSERT INTO company_rounds_info (company_info_id, round_name, mode, round_index) 
-                                               VALUES ($company_id, '$round_name', '$mode', $index)";
+                        $insert_round_query = "INSERT INTO company_rounds_info (campus_placement_info_id, round_name, mode, round_index) 
+                                               VALUES ($drive_id, '$round_name', '$mode', $index)";
                         mysqli_query($conn, $insert_round_query);
                     }
                 }
-        
+
                 echo "<script>
                         Swal.fire({
                             title: 'Updated!',
                             text: 'Rounds have been updated successfully.',
                             icon: 'success'
                         }).then(function() {
-                            window.location.href = 'campus_drive_company.php?company_id=" . $company_id . "';
+                            window.location.href = 'campus_drive_company.php?drive_id=" . $drive_id . "';
                         });
                     </script>";
                 exit;
@@ -150,8 +193,8 @@ if (isset($_GET['company_id'])) {
                 echo "Error updating record: " . mysqli_error($conn);
             }
         }
-        
-        
+
+
         ?>
 
         <div class="container mx-auto p-6">
@@ -214,41 +257,41 @@ if (isset($_GET['company_id'])) {
 
                 <!-- Rounds information -->
                 <div class="w-full md:w-1/2 mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Selection Process Rounds</label>
-                <div>
-                    <?php foreach ($rounds as $index => $round): ?>
-                        <div class="flex items-center ml-4 mb-2" id="round-<?php echo $round['id']; ?>">
-                            <span class="mr-2 text-cyan-600 font-bold"><?php echo $index+1; ?>.</span>
-                            <input type="text" name="round_names[<?php echo $round['id']; ?>]" value="<?php echo htmlspecialchars($round['round_name']); ?>" class="p-2 border-2 rounded-xl flex-1">
-                            
-                            <!-- Mode Dropdown -->
-                            <select name="round_modes[<?php echo $round['id']; ?>]" class="p-2 border-2 rounded-xl ml-2">
-                                <?php
+                    <label class="block text-gray-700 font-bold mb-2">Selection Process Rounds</label>
+                    <div>
+                        <?php foreach ($rounds as $index => $round): ?>
+                            <div class="flex items-center ml-4 mb-2" id="round-<?php echo $round['id']; ?>">
+                                <span class="mr-2 text-cyan-600 font-bold"><?php echo $index + 1; ?>.</span>
+                                <input type="text" name="round_names[<?php echo $round['id']; ?>]" value="<?php echo htmlspecialchars($round['round_name']); ?>" class="p-2 border-2 rounded-xl flex-1">
+
+                                <!-- Mode Dropdown -->
+                                <select name="round_modes[<?php echo $round['id']; ?>]" class="p-2 border-2 rounded-xl ml-2">
+                                    <?php
                                     $mode_options = getModeOptions();
                                     $current_mode = $round['mode'] ? $round['mode'] : 'offline'; // Default to 'offline' if no mode exists
                                     foreach ($mode_options as $key => $value) {
                                         echo "<option value='$key' " . ($key == $current_mode ? "selected" : "") . ">$value</option>";
                                     }
-                                ?>
-                            </select>
+                                    ?>
+                                </select>
 
-                            <!-- Round Index -->
-                            <input type="hidden" name="round_index[<?php echo $round['id']; ?>]" value="<?php echo $round['round_index']; ?>">
+                                <!-- Round Index -->
+                                <input type="hidden" name="round_index[<?php echo $round['id']; ?>]" value="<?php echo $round['round_index']; ?>">
 
-                            <!-- Delete Icon -->
-                            <button type="button" class="text-red-500 text-sm bg-red-100 h-10 w-10 ml-4 rounded-xl hover:scale-110 transition-all" onclick="deleteRound(<?php echo $round['id']; ?>)">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                            <!-- Hidden input to mark for deletion -->
-                            <input type="hidden" name="delete_rounds[]" value="" id="delete-<?php echo $round['id']; ?>">
-                        </div>
-                    
+                                <!-- Delete Icon -->
+                                <button type="button" class="text-red-500 text-sm bg-red-100 h-10 w-10 ml-4 rounded-xl hover:scale-110 transition-all" onclick="confirmDeleteRound(<?php echo $round['id']; ?>)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                <!-- Hidden input to mark for deletion -->
+                                <input type="hidden" name="delete_rounds[]" value="" id="delete-<?php echo $round['id']; ?>">
+                            </div>
+
                         <?php endforeach; ?>
                         <div id="newRoundsContainer"></div>
 
-                         <!-- Add New Round Button -->
-                         <button type="button" id="addRoundBtn" class="bg-green-500 text-white px-5 p-3 rounded-full hover:px-7 font-bold hover:bg-green-600 transition-all mt-4">
-                            Add New Round
+                        <!-- Add New Round Button -->
+                        <button type="button" id="addRoundBtn" class="bg-cyan-500 text-sm font-bold text-white ml-10 px-3 p-1 rounded-full hover:scale-110 hover:bg-cyan-600 transition-all mt-3 mb-2">
+                            + New Round
                         </button>
 
                     </div>
@@ -270,15 +313,76 @@ if (isset($_GET['company_id'])) {
 
     <script>
         // Function to mark a round for deletion and remove it from the UI
-        function deleteRound(roundId) {
-            // Mark the round for deletion
-            document.getElementById('delete-' + roundId).value = roundId;
-
-            // Remove the round div from the UI
-            document.getElementById('round-' + roundId).style.display = "none";
+        function confirmDeleteRound(roundId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to delete this round?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send AJAX request to delete the round
+                    console.log(roundId);   
+                    $.ajax({
+                        url: 'campus_company_data_edit.php', // Current file, where deletion happens
+                        type: 'POST',
+                        data: {
+                        id:roundId
+                        },
+                        success: function(response) {
+                            if (response === 'success') {
+                                // Remove the round from the UI
+                                document.getElementById('round-' + roundId).remove();
+                                updateRoundIndices();
+                                Swal.fire(
+                                    'Deleted!',
+                                    'The round has been deleted.',
+                                    'success'
+                                );
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an issue deleting the round.',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function() {
+                            Swal.fire(
+                                'Error!',
+                                'Unable to process the request.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
         }
 
-        document.getElementById('saveBtn').addEventListener('click', function () {
+
+        // Function to update round indices after deletion or addition
+        function updateRoundIndices() {
+            const rounds = document.querySelectorAll('.flex.items-center.ml-4.mb-2');
+            let index = 1; // Start from 1 for the first round
+
+            rounds.forEach((round) => {
+                const roundSpan = round.querySelector('.text-cyan-600');
+                roundSpan.textContent = `${index}.`; // Update the index text
+
+                // Update the hidden input for round_index
+                const roundInput = round.querySelector('input[name^="round_index"]');
+                if (roundInput) {
+                    roundInput.value = index; // Update the round_index value
+                }
+
+                index++; // Increment the index for the next round
+            });
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            updateRoundIndices();
             Swal.fire({
                 title: 'Are you sure?',
                 text: "Do you want to save the changes?",
@@ -292,6 +396,7 @@ if (isset($_GET['company_id'])) {
                     document.getElementById('editForm').submit();
                 }
             });
+            updateRoundIndices();
         });
 
         let roundCount = <?php echo count($rounds); ?>; // Track the number of rounds (including existing ones)
@@ -301,32 +406,35 @@ if (isset($_GET['company_id'])) {
 
             // Create new round input fields
             let newRoundHTML = `
-                <div class="flex items-center ml-4 mb-2" id="round-new-${roundCount}">
-                    <span class="mr-2 text-cyan-600 font-bold">${roundCount}.</span>
-                    <input type="text" name="round_names[new-${roundCount}]" class="p-2 border-2 rounded-xl flex-1" placeholder="Enter round name" required>
-                    
-                    <select name="round_modes[new-${roundCount}]" class="p-2 border-2 rounded-xl ml-2" required>
-                        <option value="offline">Offline</option>
-                        <option value="online">Online</option>
-                    </select>
+        <div class="flex items-center ml-4 mb-2" id="round-new-${roundCount}">
+            <span class="mr-2 text-cyan-600 font-bold">${roundCount}.</span>
+            <input type="text" name="round_names[new-${roundCount}]" class="p-2 border-2 rounded-xl flex-1" placeholder="Enter round name" required>
+            
+            <select name="round_modes[new-${roundCount}]" class="p-2 border-2 rounded-xl ml-2" required>
+                <option value="offline">Offline</option>
+                <option value="online">Online</option>
+            </select>
 
-                    <input type="hidden" name="round_index[new-${roundCount}]" value="${roundCount}"> <!-- Use dynamic index -->
+            <input type="hidden" name="round_index[new-${roundCount}]" value="${roundCount}"> <!-- Use dynamic index -->
 
-                    <button type="button" class="text-red-500 text-sm bg-red-100 h-10 w-10 ml-4 rounded-xl hover:scale-110 transition-all" onclick="removeNewRound(${roundCount})">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-            `;
+            <button type="button" class="text-red-500 text-sm bg-red-100 h-10 w-10 ml-4 rounded-xl hover:scale-110 transition-all" onclick="removeNewRound(${roundCount})">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    `;
 
             // Append the new round fields to the container
             document.getElementById('newRoundsContainer').insertAdjacentHTML('beforeend', newRoundHTML);
+            updateRoundIndices(); // Reorder indices after adding a new round
         });
+
 
         function removeNewRound(roundId) {
             // Remove the round div from the UI
             document.getElementById('round-new-' + roundId).remove();
+            updateRoundIndices();
         }
-
     </script>
 </body>
+
 </html>

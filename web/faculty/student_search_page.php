@@ -22,14 +22,12 @@
         ?>
 
         <!-- Search Section -->
-        <div class="container mx-auto p-6">
-            <h1 class="text-3xl font-semibold mb-6 text-center text-gray-800">Search Student Information</h1>
-
+        <div class="container p-6">
             <!-- Search Bar and Button -->
-            <form class="flex justify-center space-x-4 mb-6" onsubmit="event.preventDefault(); searchStudentInfo();">
-                <input type="text" id="enrollment_no" class="w-80 p-3 border border-gray-300 rounded-full text-gray-800"
+            <form class=" space-x-4 mb-6" onsubmit="event.preventDefault(); searchStudentInfo();">
+                <input type="text" id="enrollment_no" class="w-80 p-2 pl-4 border border-gray-300 drop-shadow-md rounded-xl text-gray-800"
                     placeholder="Enter Enrollment No." maxlength="12" oninput="validateInput(event)" required />
-                    <button id="search_btn" class="bg-cyan-500 text-white px-6 py-3 hover:px-10 transition-all rounded-full shadow-lg hover:bg-cyan-600 focus:outline-none" type="submit">
+                    <button id="search_btn" class="bg-cyan-500 text-white px-6 py-2 hover:px-10 transition-all rounded-full shadow-lg hover:bg-cyan-600 focus:outline-none" type="submit">
                     Search
                 </button>
             </form>
@@ -87,7 +85,7 @@
                     } else {
                         const student = data.student_info[0];
                         document.getElementById('student_details').innerHTML = `
-            <div class="space-y-4">
+            <div class="space-y-2">
                 <div class="flex">
                     <strong class="text-cyan-500 w-48">Name</strong>
                     <span class="flex-1">:  ${student.student_name}</span>

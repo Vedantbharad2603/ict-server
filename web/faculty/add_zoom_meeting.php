@@ -113,16 +113,16 @@
             <table id="meetings-table" class="min-w-full bg-white border border-gray-300 rounded">
                 <thead>
                     <tr>
-                        <th class="border px-4 py-2">
+                        <th class="border bg-gray-700 text-white px-4 py-2">
                             <input type="checkbox" id="select-all" class="cursor-pointer w-5 h-5">
                         </th>
-                        <th class="border px-4 py-2">No</th>
-                        <th class="border px-4 py-2">Meeting Title</th>
-                        <th class="border px-4 py-2">Date</th>
-                        <th class="border px-4 py-2">Time</th>
-                        <th class="border px-4 py-2">Faculty</th>
-                        <th class="border px-4 py-2">Semester</th>
-                        <th class="border px-4 py-2">Actions</th>
+                        <th class="border bg-gray-700 text-white px-4 py-2">No</th>
+                        <th class="border bg-gray-700 text-white px-4 py-2">Meeting Title</th>
+                        <th class="border bg-gray-700 text-white px-4 py-2">Date</th>
+                        <th class="border bg-gray-700 text-white px-4 py-2">Time</th>
+                        <th class="border bg-gray-700 text-white px-4 py-2">Faculty</th>
+                        <th class="border bg-gray-700 text-white px-4 py-2">Semester</th>
+                        <th class="border bg-gray-700 text-white px-4 py-2">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

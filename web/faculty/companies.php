@@ -98,12 +98,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company_name'], $_POS
                 <table id="company-table" class="min-w-full bg-white border border-gray-300 rounded-lg">
                     <thead>
                         <tr>
-                            <th class="border px-4 py-2">No</th>
-                            <th class="border px-4 py-2">Company Name</th>
-                            <th class="border px-4 py-2">Type</th>
-                            <th class="border px-4 py-2">Website</th>
-                            <th class="border px-4 py-2">Linked In</th>
-                            <th class="border px-4 py-2">Actions</th>
+                            <th class="border bg-gray-700 text-white px-4 py-2">No</th>
+                            <th class="border bg-gray-700 text-white px-4 py-2">Company Name</th>
+                            <th class="border bg-gray-700 text-white px-4 py-2">Type</th>
+                            <th class="border bg-gray-700 text-white px-4 py-2">Website</th>
+                            <th class="border bg-gray-700 text-white px-4 py-2">Linked In</th>
+                            <th class="border bg-gray-700 text-white px-4 py-2">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

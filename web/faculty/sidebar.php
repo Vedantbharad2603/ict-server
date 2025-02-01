@@ -23,7 +23,7 @@ if (!isset($_SESSION['image_url'])) {
     <div class="flex flex-col justify-between h-full">
         <div>
             <div class="p-6 bg-zinc-950 flex flex-row">
-                <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                     <img
                         class="w-full h-full object-cover"
                         src="<?php echo $imageUrl; ?>"
@@ -48,10 +48,11 @@ if (!isset($_SESSION['image_url'])) {
                 </div>
             </div>
            <ul>
-    <!-- Existing Menu Items -->
+    <div class="text-sm">
+        <!-- Existing Menu Items -->
     <li>
         <a href="dashboard.php">
-            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+            <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
                 Dashboard
             </div>
         </a>
@@ -60,7 +61,7 @@ if (!isset($_SESSION['image_url'])) {
     <?php if ($userdata['designation'] === 'hod'): ?>
         <li>
             <a href="holiday.php">
-                <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
                     Holidays
                 </div>
             </a>
@@ -69,7 +70,7 @@ if (!isset($_SESSION['image_url'])) {
 
     <li>
         <a href="student_search_page.php">
-            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+            <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
                 Student Search
             </div>
         </a>
@@ -77,7 +78,7 @@ if (!isset($_SESSION['image_url'])) {
 
     <li>
         <a href="add_zoom_meeting.php">
-            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+            <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
                 Parents Meeting
             </div>
         </a>
@@ -85,7 +86,7 @@ if (!isset($_SESSION['image_url'])) {
 
     <li>
         <a href="total_attendance_sheet.php">
-            <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+            <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
                 Students Total Attendance
             </div>
         </a>
@@ -94,7 +95,7 @@ if (!isset($_SESSION['image_url'])) {
     <?php if ($userdata['designation'] === 'hod'): ?>
         <li>
             <a href="manage_class.php">
-                <div class="w-full h-12 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
+                <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900">
                     Manage Class
                 </div>
             </a>
@@ -107,27 +108,25 @@ if (!isset($_SESSION['image_url'])) {
         <li class="relative">
         <div 
             id="placement-box"
-            class="transition-all w-full h-12 flex items-center justify-between px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900 cursor-pointer" 
+            class="transition-all w-full h-10 flex items-center justify-between px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900 cursor-pointer" 
             onclick="toggleDropdown('placement-dropdown', 'placement-box', 'arrow-icon')">
             <span>Placement</span>
             <span id="arrow-icon" class="transition-transform text-xs ">&#9660;</span> <!-- Smaller down arrow -->
         </div>
         <ul id="placement-dropdown" class="pl-5 hidden opacity-0 transform translate-y-5 transition-all duration-300 bg-zinc-800 text-white shadow-lg z-10 w-full">
             <li>
-                <a href="companies.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Companies</a>
+                <a href="companies.php" class="rounded-l-full block px-5 py-2 my-1 hover:bg-red-600 hover:ml-5 transition-all">Companies</a>
             </li>
             <li>
-                <a href="campus_drive.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Campus Drive</a>
-            </li>
+                <a href="campus_drive.php" class="rounded-l-full block px-5 py-2 my-1 hover:bg-red-600 hover:ml-5 transition-all">Campus Drive</a>
+            </li>   
             <li>
-                <a href="student_rounds.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Student Rounds</a>
-            </li>
-            <li>
-                <a href="placed_students.php" class="rounded-l-full block px-5 py-3 hover:bg-red-600 hover:ml-5 transition-all">Placed Students</a>
+                <a href="placed_students.php" class="rounded-l-full block px-5 py-2 my-1 hover:bg-red-600 hover:ml-5 transition-all">Placed Students</a>
             </li>
         </ul>
     </li>
     <?php endif; ?>
+    </div>
 
 <script>
     function toggleDropdown(dropdownId, boxId, arrowId) {
@@ -167,7 +166,7 @@ if (!isset($_SESSION['image_url'])) {
 
         <!-- Logout Button -->
         <form action="../logout.php" method="post">
-            <button type="submit" class="w-full h-12 bg-red-600 text-white text-center hover:bg-red-700 transition">
+            <button type="submit" class="w-full h-10 bg-red-600 text-white text-center hover:bg-red-700 transition">
                 Logout
             </button>
         </form>

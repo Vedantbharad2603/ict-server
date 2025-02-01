@@ -81,18 +81,27 @@ if (isset($_POST['drive_id'])) {
             <a href="campus_drive.php" class="text-white bg-gray-700 p-2 px-5 rounded-full mb-4  hover:px-7 inline-block transition-all">
                 <i class="fa-solid fa-angle-left"></i> Back
             </a>
+
+            <!-- Edit Button -->
             <a href="campus_company_data_edit.php?drive_id=<?php echo $drive_id; ?>" class="ml-3 text-white bg-cyan-600 p-2 px-5 rounded-full mb-4 hover:px-7 inline-block transition-all">
                 <i class="fa-regular fa-pen-to-square"></i> Edit
             </a>
 
+            <!-- View Student List Button -->
+            <a href="company_students_list.php?drive_id=<?php echo $drive_id; ?>&company=<?php echo $company['company_name']; ?>" class="ml-3 text-white bg-cyan-600 p-2 px-5 rounded-full mb-4 hover:px-7 inline-block transition-all">
+                <i class="fa-solid fa-list-ul"></i> View Students List
+            </a>
+
+
             <!-- Delete Form -->
             <form id="deleteForm" method="POST" action="" class="inline">
-    <input type="hidden" name="drive_id" value="<?php echo $drive_id; ?>">
-    <button type="button" id="deleteButton" class="ml-3 text-white bg-red-500 p-2 px-5 rounded-full mb-4 hover:px-7 inline-block transition-all">
-        <i class="fa-regular fa-trash-can"></i> Delete
-    </button>
-</form>
+                <input type="hidden" name="drive_id" value="<?php echo $drive_id; ?>">
+                <button type="button" id="deleteButton" class="ml-5 text-white bg-red-500 p-2 px-5 rounded-full mb-4 hover:px-7 inline-block transition-all">
+                    <i class="fa-regular fa-trash-can"></i> Delete
+                </button>
+            </form>
 
+            
             <!-- Display company information -->
             <div class="bg-white p-6 rounded-lg drop-shadow-xl">
                 <h1 class="text-3xl font-bold">

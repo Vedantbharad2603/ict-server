@@ -107,7 +107,7 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
             <!-- Display Companies -->
             <div id="companies-grid" class="grid grid-cols-1 gap-3">
                 <?php while ($company = mysqli_fetch_assoc($companies_result)): ?>
-                    <div class="company-item bg-white shadow-xl rounded-xl pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?drive_id=<?php echo $company['driveId']; ?>'">
+                    <div class="company-item bg-white shadow-xl rounded-lg pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?drive_id=<?php echo $company['driveId']; ?>'">
                         <div class="flex justify-between items-center cursor-pointer toggle-rounds" data-company-id="<?php echo $company['driveId']; ?>">
                             <div class="flex items-center">
                             <h2 class="text-lg font-bold mr-2"><?php echo $company['company_name']; ?> </h2>

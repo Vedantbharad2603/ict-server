@@ -114,7 +114,6 @@ if (!$drive_id || !$company) {
                       </script>";
             }
         }
-        
         ?>
 
         <div class="p-6">
@@ -233,7 +232,6 @@ if (!$drive_id || !$company) {
                                ?>
                            </select>
                        </div>
-
                        <div class="mb-4">
                            <label for="status" class="block text-sm font-medium mb-1">Select Status</label>
                            <select id="status" name="status" class="border rounded p-2 w-full" required>

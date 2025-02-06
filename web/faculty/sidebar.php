@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'faculty') {
     header("Location: ../login.php");
@@ -19,6 +21,7 @@ if (!isset($_SESSION['image_url'])) {
     $imageUrl = $_SESSION['image_url'];
 }
 ?>
+
 <style>
     .common-radius {
         border-radius: 10px; /* Adjust the radius as needed */
@@ -168,7 +171,6 @@ if (!isset($_SESSION['image_url'])) {
                 }
             </script>
         </div>
-
         <!-- Logout Button -->
         <form action="../logout.php" method="post">
             <button type="submit" class="w-full h-10 bg-red-600 text-white text-center hover:bg-red-700 transition">

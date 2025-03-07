@@ -8,6 +8,8 @@ include('../../api/db/db_connection.php');?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Under Development</title>
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">

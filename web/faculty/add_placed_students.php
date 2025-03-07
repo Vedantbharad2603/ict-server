@@ -20,12 +20,11 @@ function getCompanies() {
 
 $companies = getCompanies();
 
-// Fetch the current year
 $current_year = date("Y");
 
-// Fetch all batches for the dropdown
+// Fetch all batches and determine the default batch (ending in the current year)
 function getBatches() {
-    global $conn;
+    global $conn, $current_year;
     $query = "SELECT id, batch_start_year, batch_end_year FROM batch_info ORDER BY batch_start_year ASC";
     $result = mysqli_query($conn, $query);
     $batches = [];
@@ -37,63 +36,36 @@ function getBatches() {
 
 $batches = getBatches();
 
-// Fetch students for the selected batch
-function getStudentsByBatch($batch_id) {
-    global $conn;
+// Auto-select batch where batch_end_year = current year
+$selected_batch_id = null;
+foreach ($batches as $batch) {
+    if ($batch['batch_end_year'] == $current_year) {
+        $selected_batch_id = $batch['id'];
+        break;
+    }
+}
+
+// If user selects a batch manually, use that instead
+if (isset($_POST['batch_id']) && !empty($_POST['batch_id'])) {
+    $selected_batch_id = $_POST['batch_id'];
+}
+
+// Fetch students based on the selected batch
+$students = [];
+if (!empty($selected_batch_id)) {
     $query = "SELECT CONCAT(si.first_name, ' ', si.last_name) AS student_name, si.id AS student_id 
               FROM placement_support_enroll pse
               JOIN student_info si ON pse.student_info_id = si.id
-              WHERE si.batch_info_id = $batch_id";
+              WHERE si.batch_info_id = $selected_batch_id";
     $result = mysqli_query($conn, $query);
-    $students = [];
     while ($row = mysqli_fetch_assoc($result)) {
         $students[] = $row;
     }
-    echo json_encode($students); // Ensure this data is returned
-    exit();
 }
 
-// Handle AJAX request for students when batch is selected
-if (isset($_POST['batch_id'])) {
-    $batch_id = $_POST['batch_id'];
-    getStudentsByBatch($batch_id);
-}
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $company_id = $_POST['company_id'];
-    $date = $_POST['date'];
-    $package_start = $_POST['package_start'];
-    $package_end = !empty($_POST['package_end']) ? $_POST['package_end'] : $package_start; // Use package_start if package_end is empty
 
-    // Get the student IDs from the hidden input
-    $student_ids = explode(',', $_POST['student_ids']); // Convert the comma-separated string to an array
 
-    // Prepare the SQL statement
-    $query = "INSERT INTO placed_student_info (student_info_id, company_info_id, package_start, package_end, date) VALUES (?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($query);
-
-    foreach ($student_ids as $student_id) {
-        // Bind parameters and execute the statement
-        if (!$stmt->bind_param("iidds", $student_id, $company_id, $package_start, $package_end, $date)) {
-            die("Binding parameters failed: " . $stmt->error);
-        }
-        if (!$stmt->execute()) {
-            die("Execute failed: " . $stmt->error);
-        }
-    }
-    // Redirect after successful insertion
-    echo "<script>
-            Swal.fire({
-                title: 'Saved!',
-                text: 'Placed students added successfully.',
-                icon: 'success'
-            }).then(function() {
-                window.location.href = 'placed_students.php';
-            });
-        </script>";
-    exit;
-}
 ?>
 
 <!DOCTYPE html>
@@ -113,12 +85,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         $(document).ready(function() {
+            
             const selectedBatchId = $('select[name="batch_id"]').val();
             console.log("Selected Batch ID on page load: " + selectedBatchId); // Print the selected batch ID in the console
 
             // Global array to store selected student IDs
             let studentIds = [];
 
+             // Function to update the hidden input before form submission
+            function updateHiddenInput() {
+                $('#student_ids').val(JSON.stringify(studentIds));
+            }
             // Function to fetch students for the selected batch
             function fetchStudents(batchId, excludeIds = []) {
                 if (batchId) {
@@ -129,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             batch_id: batchId
                         },
                         success: function(response) {
-                            const students = JSON.parse(response);
+                            const students = JSON.parse(response); // Parse the JSON response
                             const studentDropdown = $('#student-dropdowns');
                             studentDropdown.empty();
                             studentDropdown.append('<div class="student-dropdown-group"><label class="block text-gray-700 font-bold mb-2">Select Student*</label><select name="student_id[]" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" required><option value="" disabled selected>Select a student</option></select></div>');
@@ -157,66 +134,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
 
             $('#add-student').click(function(e) {
-                e.preventDefault(); // Prevent form submission
-                const studentId = $('#student-dropdowns select').val();
-                const studentName = $('#student-dropdowns select option:selected').text();
+            e.preventDefault();
+            const studentId = $('#student-dropdowns select').val();
+            const studentName = $('#student-dropdowns select option:selected').text();
 
-                if (studentId) {
-                    // Check if the student is already in the placed list
-                    if (studentIds.includes(studentId)) {
-                        alert('This student is already added to the placed list.');
-                        return;
-                    }
+        if (studentId && !studentIds.includes(studentId)) {
+            studentIds.push(studentId);
+            updateHiddenInput(); // Update hidden input
 
-                    // Add the student ID to the global array
-                    studentIds.push(studentId);
+            $('#placed-students').append(`
+                <div data-id="${studentId}" class="w-1/3 border border-gray-300 mb-2 p-2 px-4 hover:bg-gray-100 rounded-xl shadow-md flex justify-between items-center transition-all">
+                    <span>${studentName}</span>
+                    <button class="remove-student text-red-500 text-sm bg-red-100 h-10 w-10 ml-4 rounded-xl hover:scale-110 transition-all cursor-pointer"> 
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `);
+            
+            $('#placed-students-card').removeClass('hidden');
+            $('#student-dropdowns select option:selected').remove();
+        }
+    });
 
-                    // Append the student to the placed students list
-                    $('#placed-students').append(
-                        `<div data-id="${studentId}" class="w-1/3 border border-gray-300 mb-2 p-2 px-4 hover:bg-gray-100 rounded-xl shadow-md flex justify-between items-center transition-all">
-                        <span>${studentName}</span>
-                        <button class="remove-student text-red-500 text-sm bg-red-100 h-10 w-10 ml-4 rounded-xl hover:scale-110 transition-all cursor-pointer"> 
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>`
-                    );
+    $(document).on('click', '.remove-student', function() {
+        const studentCard = $(this).closest('div[data-id]');
+        const studentId = studentCard.data('id');
 
-                    // Show the placed students card if it's hidden
-                    $('#placed-students-card').removeClass('hidden');
+        studentCard.remove();
+        studentIds = studentIds.filter(id => id != studentId);
+        updateHiddenInput(); // Update hidden input
 
-                    // Remove the selected student from the dropdown
-                    $('#student-dropdowns select option:selected').remove();
+        if ($('#placed-students div[data-id]').length === 0) {
+            $('#placed-students-card').addClass('hidden');
+        }
+    });
 
-                    // Update the hidden input with the selected student IDs
-                    $('#student_ids').val(studentIds.join(','));
-                }
-            });
-
-            $(document).on('click', '.remove-student', function() {
-                // Get the parent div of the button that was clicked
-                const studentCard = $(this).closest('div[data-id]');
-                const studentId = studentCard.data('id');
-                const studentName = studentCard.find('span').text(); // Get the student name from the span
-
-                // Remove the specific student card
-                studentCard.remove();
-
-                // Remove the student ID from the global array
-                studentIds = studentIds.filter(id => id != studentId);
-                console.log("for delete = " + studentId);
-                console.log(studentIds);
-
-                // Re-add the student back to the dropdown
-                $('#student-dropdowns select').append(`<option value="${studentId}">${studentName}</option>`);
-
-                // Hide the placed students card if there are no students left
-                if ($('#placed-students div[data-id]').length === 0) {
-                    $('#placed-students-card').addClass('hidden');
-                }
-
-                // Update the hidden input with the selected student IDs
-                $('#student_ids').val(studentIds.join(','));
-            });
+    // Ensure hidden input is updated before form submission
+    $('#addPlaceStudentForm').submit(function() {
+        updateHiddenInput();
+    });
         });
     </script>
 </head>
@@ -227,6 +183,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php
         $page_title = "Add Placed Students";
         include('./navbar.php');
+
+           // Insert placed students
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_data'])) {
+    $company_id = $_POST['company_id'];
+    $date = $_POST['date'];
+    $package_start = $_POST['package_start'];
+    $package_end = !empty($_POST['package_end']) ? $_POST['package_end'] : $package_start;
+    $student_ids = isset($_POST['student_ids']) ? json_decode($_POST['student_ids'], true) : [];
+
+    if (!empty($student_ids)) {
+        foreach ($student_ids as $student_id) {
+            $query = "INSERT INTO placed_student_info (student_info_id, company_info_id, package_start, package_end, date) 
+                      VALUES (?, ?, ?, ?, ?)";
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, "iidds", $student_id, $company_id, $package_start, $package_end, $date);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+        }
+    }
+    echo "<script>
+                Swal.fire({
+                    title: 'Added!',
+                    text: 'Placed students added successfully.',
+                    icon: 'success'
+                }).then(function() {
+                    window.location.href = 'placed_students.php';
+                });
+            </script>";
+                exit();
+}
         ?>
 
         <div class="container mx-auto p-6">
@@ -259,27 +245,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <!-- Batch Dropdown -->
                     <div class="w-full md:w-1/6">
                         <label class="block text-gray-700 font-bold mb-2">Batch*</label>
-                        <select name="batch_id" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" required>
+
+            
+                        <select name="batch_id" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" required onchange="this.form.submit()">
+                            <option value="" disabled>Select a batch</option>
                             <?php foreach ($batches as $batch): ?>
-                                <option value="<?php echo $batch['id']; ?>"
-                                    <?php echo ($batch['batch_end_year'] == $current_year) ? 'selected' : ''; ?>>
+                                <option value="<?php echo $batch['id']; ?>" <?php echo ($batch['id'] == $selected_batch_id) ? 'selected' : ''; ?>>
                                     <?php echo $batch['batch_start_year'] . ' - ' . $batch['batch_end_year']; ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
+
                     </div>
 
                     <!-- Package Start -->
                     <div class="w-40">
                         <label class="block text-gray-700 font-bold mb-2">Package Start*</label>
-                        <input type="number" name="package_start" placeholder="LPA" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" required>
+                        <input type="number" name="package_start" placeholder="LPA" step="0.01" min="0" 
+                            class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" required>
                     </div>
 
                     <!-- Package End -->
                     <div class="w-40">
                         <label class="block text-gray-700 font-bold mb-2">Package End</label>
-                        <input type="number" name="package_end" placeholder="LPA" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                        <input type="number" name="package_end" placeholder="LPA" step="0.01" min="0" 
+                            class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
                     </div>
+
                 </div>
                 <br>
                 <!-- Student Dropdowns Container -->
@@ -288,7 +280,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="student-dropdown-group">
                         <label class="block text-gray-700 font-bold mb-2">Select Student*</label>
                         <select name="student_id[]" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" required>
-                            <option value="" disabled selected>Select a student</option>
+                        <?php foreach ($students as $student): ?>
+                            <option value="<?php echo $student['student_id']; ?>"><?php echo $student['student_name']; ?></option>
+                        <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
@@ -305,29 +299,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <!-- Submit Button -->
                 <div class="w-full text-left mt-10">
-                    <button type="submit" name="saveBtn" class="bg-cyan-500 text-white px-6 py-2 rounded-2xl hover:scale-105 text-md font-bold hover:bg-cyan-600 cursor-pointer transition-all">
+                    <button type="submit" id="save_data" name="save_data" class="bg-cyan-500 text-white px-6 py-2 rounded-2xl hover:scale-105 text-md font-bold hover:bg-cyan-600 cursor-pointer transition-all">
                         Save Data
                     </button>
                 </div>
             </form>
         </div>
     </div>
-    <script>
-        document.getElementById('saveBtn').addEventListener('click', function() {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you want to save the changes?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, save it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('addPlaceStudentForm').submit();
-                }
-            });
-        });
-    </script>
 </body>
 </html>

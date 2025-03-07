@@ -68,7 +68,7 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Companies and Rounds</title>
+    <title>Campus drives</title>
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -78,7 +78,7 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
     <?php include('./sidebar.php'); ?>
     <div class="main-content pl-64 flex-1 ml-1/6 overflow-y-auto">
         <?php
-        $page_title = "Companies and Rounds";
+        $page_title = "Campus drives";
         include('./navbar.php');
         ?>
 

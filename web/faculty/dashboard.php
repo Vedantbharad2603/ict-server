@@ -6,7 +6,9 @@
     <title>Faculty Dashboard</title>
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 </head>
 
 <body class="bg-gray-100 text-gray-800 flex">
@@ -31,7 +33,6 @@ $total_holidays = 0;
 if ($holiday_result && $row = $holiday_result->fetch_assoc()) {
     $total_holidays = $row['total_holidays'];
 }
-
 // Query for semester-wise student count
 $student_query = "
 SELECT
@@ -60,11 +61,12 @@ if ($student_count_result && $row = $student_count_result->fetch_assoc()) {
 }
 
 // Query to get the total number of companies
-$company_count_query = "SELECT COUNT(*) AS total_companies FROM company_info";
+$company_count_query = "SELECT COUNT(*) AS total_subjects FROM subject_info";
 $company_count_result = $conn->query($company_count_query);
-$total_companies = 0;
+$total_subjects = 0;
+
 if ($company_count_result && $row = $company_count_result->fetch_assoc()) {
-    $total_companies = $row['total_companies'];
+    $total_subjects = $row['total_subjects'];
 }
 
 // Query to get the total number of faculties
@@ -78,46 +80,67 @@ if ($faculty_count_result && $row = $faculty_count_result->fetch_assoc()) {
 
 ?>
     <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <!-- Holiday Card -->
-            <div 
-                class="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform hover:scale-105 cursor-pointer"
-                onclick="window.location.href='holiday.php';"
-            >
-                <h2 class="text-xl font-semibold mb-2">Total Holidays</h2>
-                <p id="holiday-count" class="text-4xl font-bold text-cyan-500">0</p>
+            <div class="bg-white border border-yellow-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
+                onclick="window.location.href='holiday.php';">
+                <div class="flex items-center">
+                <i class="fa-solid fa-sun text-4xl text-yellow-500 "></i>
+                    <h2 class="text-yellow-600 text-xl pl-5 font-semibold ">
+                        Holidays
+                    </h2>
+                </div>
+                <p id="holiday-count" class="text-5xl font-bold text-yellow-500 ">
+                    00
+                </p>
             </div>
+
 
             <!-- Total Students Card -->
-            <div 
-                class="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform hover:scale-105 cursor-pointer"
-            >
-                <h2 class="text-xl font-semibold mb-2">Total Students</h2>
-                <p id="student-count" class="text-4xl font-bold text-cyan-500">0</p>
+            <div class="bg-white border border-cyan-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
+            onclick="window.location.href='student_search_page.php';">
+                <div class="flex items-center">
+                <i class="fa-solid fa-users text-3xl text-cyan-500 "></i>
+                    <h2 class="text-cyan-600 text-lg pl-5 font-semibold ">
+                        Total Students
+                    </h2>
+                </div>
+                <p id="student-count" class="text-5xl font-bold text-cyan-500 ">
+                    00
+                </p>
             </div>
+
 
             <!-- Total Faculties Card -->
-            <div 
-                class="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform hover:scale-105 cursor-pointer">
-                <h2 class="text-xl font-semibold mb-2">Total Faculties</h2>
-                <p id="faculty-count" class="text-4xl font-bold text-cyan-500">0</p>
+            <div class="bg-white border border-blue-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
+            onclick="window.location.href='faculty_list.php';">
+                <div class="flex items-center">
+                <i class="fa-solid fa-chalkboard-user text-3xl text-blue-500 "></i>
+                    <h2 class="text-blue-600 text-lg pl-5 font-semibold ">
+                        Total Faculties
+                    </h2>
+                </div>
+                <p id="faculty-count" class="text-5xl font-bold text-blue-500 ">
+                    00
+                </p>
             </div>
 
-            <!-- Total Companies Card -->
-            <div 
-                class="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform hover:scale-105 cursor-pointer"
-                onclick="window.location.href='companies.php';"
-            >
-                <h2 class="text-xl font-semibold mb-2">Total Companies</h2>
-                <p id="company-count" class="text-4xl font-bold text-cyan-500">0</p>
+             <!-- Total subjects Card -->
+             <div class="bg-white border border-green-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group">
+                <div class="flex items-center">
+                <i class="fa-solid fa-book text-3xl text-green-500 "></i>
+                    <h2 class="text-green-600 text-lg pl-5 font-semibold ">
+                        Total Subjects
+                    </h2>
+                </div>
+                <p id="subject-count" class="text-5xl font-bold text-green-500 ">
+                    00
+                </p>
             </div>
+
+
         </div>
 
-        <!-- Bar Chart Section -->
-        <div class="mt-8 h-96">
-            <h2 class="text-xl font-bold mb-4">Semester-Wise Student Count</h2>
-            <canvas id="studentBarChart" class="bg-white p-5 shadow-md rounded-lg "></canvas>
-        </div>
     </div>
 </div>
 
@@ -154,76 +177,10 @@ if ($faculty_count_result && $row = $faculty_count_result->fetch_assoc()) {
     countUp('faculty-count', 0, totalFaculties, 1000);
 
     // Animate Holiday Count
-    const totalCompanies = <?php echo $total_companies; ?>;
-    countUp('company-count', 0, totalCompanies, 1000);
+    const totalSubjectss = <?php echo $total_subjects; ?>;
+    countUp('subject-count', 0, totalSubjectss, 1000);
 
-    // Bar Chart Data
-    const studentData = <?php echo json_encode($student_data); ?>;
 
-    // Parse data for Chart.js
-    const labels = [];
-    const degreeData = [];
-    const diplomaData = [];
-    studentData.forEach(entry => {
-        const label = `Sem ${entry.sem}`;
-        if (!labels.includes(label)) {
-            labels.push(label);
-        }
-        if (entry.edu_type === 'degree') {
-            degreeData.push(entry.total);
-        } else if (entry.edu_type === 'diploma') {
-            diplomaData.push(entry.total);
-        }
-    });
-
-    // Fill missing data for alignment
-    while (degreeData.length < labels.length) degreeData.push(0);
-    while (diplomaData.length < labels.length) diplomaData.push(0);
-
-    // Chart.js Bar Chart
-    const ctx = document.getElementById('studentBarChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Degree Students',
-                    data: degreeData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                },
-                {
-                    label: 'Diploma Students',
-                    data: diplomaData,
-                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Semester-Wise Student Count',
-                },
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                },
-                y: {
-                    beginAtZero: true,
-                },
-            },
-        },
-    });
 </script>
 
 </body>

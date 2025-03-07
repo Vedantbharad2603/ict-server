@@ -13,6 +13,14 @@ function ParentRoutes($method, $subpath) {
                 echo json_encode(['message' => 'Method not allowed']);
             }
             break;
+        case 'logout': // Handle "Parent/Logutn"
+            if ($method === 'POST') {
+                ParentLogoutController($input);
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed']);
+            }
+            break;
         case 'getFacultyContact': // Handle "Parent/getFacultyContact"
             if ($method === 'POST') {
                 GetFacultyContactController($input);

@@ -1,4 +1,5 @@
 <?php
+include('../../api/db/db_connection.php'); 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -11,20 +12,25 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'faculty') {
 $userdata = $_SESSION['userdata'];
 $user = $_SESSION['user'];
 
-// Check if the image URL is already stored in the session
 if (!isset($_SESSION['image_url'])) {
-    // Generate and store the image URL in session
     $imageUrl = "https://marwadieducation.edu.in/MEFOnline/handler/getImage.ashx?Id=" . htmlspecialchars($user['username']);
     $_SESSION['image_url'] = $imageUrl;
 } else {
-    // Use the stored image URL
     $imageUrl = $_SESSION['image_url'];
+}
+
+$pending_leave = 0;
+$sql = "SELECT COUNT(*) AS pending_leave FROM leave_info WHERE leave_status='pending'";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $pending_leave = $row['pending_leave'];
 }
 ?>
 
 <style>
     .common-radius {
-        border-radius: 10px; /* Adjust the radius as needed */
+        border-radius: 10px;
     }
 </style>
 
@@ -32,13 +38,13 @@ if (!isset($_SESSION['image_url'])) {
     <div class="flex flex-col justify-between h-full">
         <div>
             <div class="p-6 bg-zinc-950 flex flex-row">
-                <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center common-radius">
+                <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                     <img
                         class="w-full h-full object-cover"
                         src="<?php echo $imageUrl; ?>"
                         alt="Faculty Image"
-                        onerror="this.onerror=null; this.src='../assets/images/favicon.png';">
-                </div>
+                        onerror="this.onerror=null; this.src='../assets/images/favicon.png'; this.classList.add('p-3');">
+                        </div>
                 <div class="pl-3">
                     <span class="block text-md font-medium">
                         <?php echo ($userdata['first_name'] . " " . $userdata['last_name']); ?>
@@ -59,7 +65,7 @@ if (!isset($_SESSION['image_url'])) {
                 <div class="text-sm px-2">
                     <!-- Existing Menu Items -->
                 <?php
-                $radious = "rounded-lg";  // Apply common-radius class here
+                    $radious = "rounded-lg";  // common-radius 
                 ?>
                 <li>
                     <a href="dashboard.php">
@@ -79,13 +85,14 @@ if (!isset($_SESSION['image_url'])) {
                 </li>
                 <?php endif; ?>
 
-                <li>
+
+                <!-- <li>
                     <a href="student_search_page.php">
                         <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900 <?php echo $radious; ?>">
                             Student Search
                         </div>
                     </a>
-                </li>
+                </li> -->
 
                 <li>
                     <a href="add_zoom_meeting.php">
@@ -102,6 +109,23 @@ if (!isset($_SESSION['image_url'])) {
                         </div>
                     </a>
                 </li>
+
+                <?php if ($userdata['designation'] === 'hod'): ?>
+                    <li>
+                    <a href="students_leave.php">
+                        <div class="w-full h-10 flex items-center px-5 text-white transition bg-transparent hover:bg-red-600 active:bg-red-900 <?php echo $radious; ?> justify-between group">
+                            Students Leave Request
+                            <?php if ($pending_leave > 0): ?>
+                                <div class="bg-red-600 text-white px-3 py-1 rounded-md transition-colors duration-300 group-hover:bg-zinc-800 ">
+                                    <?php echo $pending_leave; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                </li>
+
+
+                <?php endif; ?>
 
                 <?php if ($userdata['designation'] === 'hod'): ?>
                 <li>

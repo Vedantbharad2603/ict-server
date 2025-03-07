@@ -113,9 +113,6 @@ $batches = getBatches();
                 echo "Error inserting record: " . mysqli_error($conn);
             }
         }
-
-
-
         ?>
 
         <div class="container mx-auto p-6">

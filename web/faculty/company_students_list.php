@@ -42,7 +42,8 @@ if (!$drive_id || !$company) {
                     $check_query = "SELECT id FROM student_round_info 
                                     WHERE student_info_id = $student_id 
                                     AND campus_placement_info_id = $drive_id";
-                    $check_result = mysqli_query($conn, $check_query);
+                    $check_result = mysqli_query($conn, $check_query);  
+                    
         
                     if (mysqli_num_rows($check_result) > 0) {
                         // Update existing record
@@ -144,10 +145,10 @@ if (!$drive_id || !$company) {
                        if ($total_rounds_result) {
                            $total_rounds = mysqli_fetch_assoc($total_rounds_result)['total_rounds'];
 
-                           $query = "SELECT si.id AS student_id, CONCAT(si.first_name, ' ', si.last_name) AS student_name,enrollment_no, pse.datetime 
-                                     FROM placement_student_enroll pse
-                                     JOIN student_info si ON pse.student_info_id = si.id
-                                     WHERE pse.campus_drive_info_id = $drive_id";
+                           $query = "SELECT si.id AS student_id, CONCAT(si.first_name, ' ', si.last_name) AS student_name,enrollment_no, cde.datetime 
+                                     FROM campus_drive_enroll cde
+                                     JOIN student_info si ON cde.student_info_id = si.id
+                                     WHERE cde.campus_drive_info_id = $drive_id AND cde.status='yes'";
                            $result = mysqli_query($conn, $query);
 
                            if (mysqli_num_rows($result) > 0) {

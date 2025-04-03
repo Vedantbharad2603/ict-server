@@ -4,6 +4,8 @@ require 'utils/ApiKeyValidator.php';
 require 'routes/AppVersionRoutes.php';
 require 'routes/ParentRoutes.php';
 require 'routes/FacultyRoutes.php';
+require 'routes/StudentRoutes.php';
+require 'routes/PlacementRoutes.php';
 require 'routes/AttendanceRoutes.php';
 require 'routes/PasswordRoutes.php';
 require 'routes/ZoomRoutes.php';
@@ -26,6 +28,12 @@ switch ($endpoint) {
         break;
     case 'Parent':
         ParentRoutes($method, $subpath);
+        break;
+    case 'Student':
+        StudentRoutes($method, $subpath);
+        break;
+    case 'Placement':
+        PlacementRoutes($method, $subpath);
         break;
     case 'Faculty':
         FacultyRoutes($method, $subpath);

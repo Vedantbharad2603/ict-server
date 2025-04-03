@@ -78,20 +78,20 @@ if (isset($_GET['status'])) {
 }
 ?>
 <div class="p-6">
-    <button onclick="openAddEditPopup()" class="bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full mb-6 transition-all">Add Holiday</button>
-    <button onclick="deleteSelectedHolidays()" class="bg-red-500 px-6 hover:px-8 text-white p-2 hover:bg-red-600 rounded-full mb-6 ml-4 transition-all">Delete Selected</button>
+    <button onclick="openAddEditPopup()" class="bg-cyan-500 shadow-md hover:shadow-xl px-6 text-white p-2  hover:bg-cyan-600 rounded-md mb-6 transition-all">Add Holiday</button>
+    <button onclick="deleteSelectedHolidays()" class="bg-red-500 shadow-md hover:shadow-xl px-6 text-white p-2 hover:bg-red-700 rounded-md mb-6 ml-4 transition-all">Delete Selected</button>
     <form id="holiday-table-form" class="rounded-lg" method="POST">
         <input type="hidden" name="delete_selected" value="1">
-        <table id="holiday-table" class="min-w-full bg-white border border-gray-300 rounded-lg">
+        <table id="holiday-table" class="min-w-full bg-white shadow-lg rounded-md">
             <thead>
-                <tr>
-                    <th class="border px-4 py-2">
+                <tr class="bg-gray-700 text-white">
+                    <th class="border px-4 py-2 rounded-tl-md">
                         <input type="checkbox" id="select-all" class="cursor-pointer w-5 h-5">
                     </th>
                     <th class="border px-4 py-2">No</th>
                     <th class="border px-4 py-2">Holiday Name</th>
                     <th class="border px-4 py-2">Date of holiday</th>
-                    <th class="border px-4 py-2">Actions</th>
+                    <th class="border px-4 py-2 rounded-tr-md">Actions</th>
                 </tr>
             </thead>
             <tbody>

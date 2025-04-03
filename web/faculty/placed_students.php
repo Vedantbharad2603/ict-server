@@ -67,14 +67,14 @@ $current_year = date("Y");
         
         <div class="p-6">
             <div class="mb-4 flex items-center">
-                <a href="add_placed_students.php" class="drop-shadow-md bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full transition-all">
+                <a href="add_placed_students.php" class="shadow-lg bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-md   transition-all">
                     Add Student
                 </a>
-                <input type="text" id="search" class="drop-shadow-md border-2 ml-10 pl-4 p-2 rounded-full w-1/2" 
+                <input type="text" id="search" class="shadow-lg border-2 ml-10 pl-4 p-2 rounded-md w-1/2" 
                        placeholder="Search Students/Companies..." onkeyup="searchTable()">
                 
                 <!-- Batch Dropdown -->
-                <select id="batchDropdown" class="ml-10 drop-shadow-md border-2 px-5 p-2 rounded-2xl" onchange="fetchPlacedStudents()">
+                <select id="batchDropdown" class="ml-10 shadow-lg border-2 px-5 p-2 rounded-md" onchange="fetchPlacedStudents()">
                     <?php 
                     while ($batch = mysqli_fetch_assoc($batches_result)):
                         $selected = ($batch['batch_end_year'] == $current_year) ? "selected" : "";

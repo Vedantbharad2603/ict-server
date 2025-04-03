@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 
-$sql = "SELECT id, sem, edu_type FROM sem_info";
+$sql = "SELECT id,sem,edu_type FROM sem_info";
 $result = $conn->query($sql);
 
 try {
@@ -544,21 +544,29 @@ $conn->close();
         <div class="bg-white shadow-lg rounded-2xl p-10 mb-4 max-w-xl w-full">
             <!-- Form 1 -->
             <form method="post">
-                <div class="mb-4">
-                    <label for="semId" class="block text-gray-700 font-bold mb-2">Select Semester:</label>
-                    <select name="semId" id="semId" class="block w-full border-2 rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php
-                        if ($result->num_rows > 0) {
-                            // Output data for each row
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<option value='" . $row['id'] . "'>" ." Sem - ".$row['sem'] . " - " . $row['edu_type'] . "</option>";
-                            }
-                        } else {
-                            echo "<option value=''>No data available</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
+            <div class="mb-4">
+    <label for="semId" class="block text-gray-700 font-bold mb-2">Select Semester:</label>
+    <select name="semId" id="semId" class="block w-full border-2 rounded py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <?php
+        if (!isset($result)) {
+            echo "<option value=''>Error: Result variable not defined</option>";
+            echo "<script>console.log('Error: Result variable not defined');</script>";
+        } elseif ($result->num_rows > 0) {
+            echo "<script>console.log('Rows found: " . $result->num_rows . "');</script>";
+            // Output data for each row
+            while ($row = $result->fetch_assoc()) {
+                // Print row data to console
+                $rowData = json_encode($row); // Safely encode row data for JavaScript
+                echo "<script>console.log('Row data: ', " . $rowData . ");</script>";
+                echo "<option value='" . $row['id'] . "'>Sem - " . $row['sem'] . " - " . $row['edu_type'] . "</option>";
+            }
+        } else {
+            echo "<option value=''>No data available</option>";
+            echo "<script>console.log('No rows found');</script>";
+        }
+        ?>
+    </select>
+</div>
                 <button type="submit" name="download" class="bg-blue-500 text-white font-bold py-2 px-10 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     Download Sheet
                 </button>

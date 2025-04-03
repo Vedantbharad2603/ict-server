@@ -88,22 +88,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['company_name'], $_POS
            
             
             <!-- Search bar for real-time search -->
-            <div class="mb-4">
-                <button onclick="openAddEditPopup()" class="drop-shadow-md bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full mb-6 transition-all">Add Company</button>
-                <input type="text" id="search" class="drop-shadow-md border-2 ml-10 pl-4 p-2 rounded-full w-1/2" placeholder="Search Companies..." onkeyup="searchTable()">
+            <div>
+                <button onclick="openAddEditPopup()" class="bg-cyan-500 shadow-md hover:shadow-xl px-6 text-white p-2  hover:bg-cyan-600 rounded-md mb-6 transition-all">Add Company</button>
+                <input type="text" id="search" class="shadow-lg ml-5 pl-4 p-2 rounded-md w-1/2" placeholder="Search Companies..." onkeyup="searchTable()">
             </div>
 
-            <form id="company-table-form" class="rounded-lg" method="POST">
+            <form id="company-table-form" method="POST">
                 <input type="hidden" name="delete_selected" value="1">
-                <table id="company-table" class="min-w-full bg-white border border-gray-300 rounded-lg">
+                <table id="company-table" class="min-w-full bg-white shadow-md rounded-md">
                     <thead>
-                        <tr>
-                            <th class="border bg-gray-700 text-white px-4 py-2">No</th>
-                            <th class="border bg-gray-700 text-white px-4 py-2">Company Name</th>
-                            <th class="border bg-gray-700 text-white px-4 py-2">Type</th>
-                            <th class="border bg-gray-700 text-white px-4 py-2">Website</th>
-                            <th class="border bg-gray-700 text-white px-4 py-2">Linked In</th>
-                            <th class="border bg-gray-700 text-white px-4 py-2">Actions</th>
+                        <tr class="bg-gray-700 text-white">
+                            <th class="border px-4 py-2  rounded-tl-md">No</th>
+                            <th class="border px-4 py-2">Company Name</th>
+                            <th class="border px-4 py-2">Type</th>
+                            <th class="border px-4 py-2">Website</th>
+                            <th class="border px-4 py-2">Linked In</th>
+                            <th class="border px-4 py-2 rounded-tr-md">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

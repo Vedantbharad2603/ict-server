@@ -2,7 +2,7 @@
 include('../../api/db/db_connection.php');
 
 // Fetch all companies
-$companies_query = "SELECT cpi.id as driveId,cmi.id, cmi.company_name, cpi.date, cpi.time FROM campus_placement_info cpi JOIN company_info cmi ON cpi.company_info_id = cmi.id";
+$companies_query = "SELECT cpi.id as driveId, cmi.id, cmi.company_name, cpi.date, cpi.time FROM campus_placement_info cpi JOIN company_info cmi ON cpi.company_info_id = cmi.id";
 $companies_result = mysqli_query($conn, $companies_query);
 
 // Fetch all batches
@@ -30,35 +30,37 @@ function getPlacementsByBatch($batch_id) {
 // Handle AJAX request for companies by batch
 if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
     $batch_id = intval($_GET['batch_id']);
-    $companies_query = "SELECT cpi.id as driveId,cmi.id, cmi.company_name, cpi.date, cpi.time 
-                         FROM campus_placement_info cpi 
-                         JOIN company_info cmi ON cpi.company_info_id = cmi.id
-                         WHERE cpi.batch_info_id = $batch_id";
+    $companies_query = "SELECT cpi.id as driveId, cmi.id, cmi.company_name, cpi.date, cpi.time 
+                        FROM campus_placement_info cpi 
+                        JOIN company_info cmi ON cpi.company_info_id = cmi.id
+                        WHERE cpi.batch_info_id = $batch_id";
     $companies_result = mysqli_query($conn, $companies_query);
     
     if (mysqli_num_rows($companies_result) > 0) {
-        while ($company = mysqli_fetch_assoc($companies_result)): ?>
-            <div class="company-item bg-white shadow-xl rounded-xl pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?drive_id=<?php echo $company['driveId']; ?>'">
-                <div class="flex justify-between items-center cursor-pointer toggle-rounds" data-company-id="<?php echo $company['driveId']; ?>">
-                    <div class="flex items-center">
-                        <h2 class="text-lg font-bold mr-2"><?php echo $company['company_name']; ?> </h2>
-                        <span> - - | - - <strong>Date & Time: </strong>
-                            <?php
-                            if ($company['date'] && $company['time']) {
-                                echo $company['date'] ? date("d/m/Y", strtotime($company['date'])) : "";
-                                echo " - ";
-                                echo $company['time'] ? date("g:i A", strtotime($company['time'])) : "";
-                            } else {
-                                echo "Will be declared";
-                            }
-                            ?>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        <?php endwhile;
+        echo '<table id="companies-table" class="min-w-full bg-white shadow-md rounded-md table-fixed">';
+        echo '<thead>';
+        echo '<tr class="bg-cyan-600 text-white rounded-t-md">';
+        echo '<th class="border px-4 py-2 rounded-tl-md w-1/12">No</th>';
+        echo '<th class="border px-4 py-2 w-5/12">Company Name</th>';
+        echo '<th class="border px-4 py-2 w-3/12">Date</th>';
+        echo '<th class="border px-4 py-2 rounded-tr-md w-3/12">Time</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+        $counter = 1;
+        while ($company = mysqli_fetch_assoc($companies_result)) {
+            echo "<tr class='hover:bg-cyan-100 transition-all cursor-pointer' onclick=\"window.location.href='campus_drive_company.php?drive_id={$company['driveId']}'\">";
+            echo "<td class='border px-4 py-2 text-center'>{$counter}</td>";
+            echo "<td class='border px-4 py-2'>{$company['company_name']}</td>";
+            echo "<td class='border px-4 py-2 text-center'>" . ($company['date'] ? date("d/m/Y", strtotime($company['date'])) : "Will be declared") . "</td>";
+            echo "<td class='border px-4 py-2 text-center'>" . ($company['time'] ? date("g:i A", strtotime($company['time'])) : "Will be declared") . "</td>";
+            echo "</tr>";
+            $counter++;
+        }
+        echo '</tbody>';
+        echo '</table>';
     } else {
-        echo '<p class="text-white-500 mb-5">No companies found for this batch.</p>';
+        echo '<p class="text-gray-500 mb-5">No companies found for this batch.</p>';
     }
     exit;
 }
@@ -68,7 +70,7 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campus drives</title>
+    <title>Campus Drives</title>
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -78,22 +80,19 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
     <?php include('./sidebar.php'); ?>
     <div class="main-content pl-64 flex-1 ml-1/6 overflow-y-auto">
         <?php
-        $page_title = "Campus drives";
+        $page_title = "Campus Drives";
         include('./navbar.php');
         ?>
 
         <div class="container mx-auto p-6">
             <!-- Add Campus Drive Button and Search Bar -->
-            <div class="mb-4 flex items-center">
-            <button onclick="window.location.href='add_campus_drive.php';" class="drop-shadow-md bg-cyan-500 px-6 hover:px-8 text-white p-2 hover:bg-cyan-600 rounded-full mb-4 transition-all">Add Campus Drive</button>
-
+            <div class="mb-6">
+                <button onclick="window.location.href='add_campus_drive.php';" class="bg-cyan-500 shadow-md hover:shadow-xl px-6 text-white p-2 hover:bg-cyan-600 rounded-md transition-all">Add Campus Drive</button>
                 <!-- Search Bar -->
-                <input type="text" id="search" class="ml-10 drop-shadow-md border-2 pl-4 p-2 rounded-full w-1/2 mb-4" placeholder="Search Companies..." onkeyup="searchCompanies()">
-                
+                <input type="text" id="search" class="ml-5 shadow-lg pl-4 p-2 rounded-md w-1/2" placeholder="Search by companies" onkeyup="searchCompanies()">
                 <!-- Batch Dropdown -->
-                 <select id="batchDropdown" class="ml-10 drop-shadow-md border-2 px-5 p-2 rounded-xl mb-4" onchange="fetchCompaniesByBatch()">
+                <select id="batchDropdown" class="ml-10 drop-shadow-md border-2 px-5 p-2 rounded-md" onchange="fetchCompaniesByBatch()">
                     <?php 
-                    // Loop through batches and set the default option if the batch_end_year matches current year
                     while ($batch = mysqli_fetch_assoc($batches_result)):
                         $selected = ($batch['batch_end_year'] == $current_year) ? "selected" : "";
                     ?>
@@ -104,29 +103,34 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
                 </select>
             </div>
 
-            <!-- Display Companies -->
-            <div id="companies-grid" class="grid grid-cols-1 gap-3">
-                <?php while ($company = mysqli_fetch_assoc($companies_result)): ?>
-                    <div class="company-item bg-white shadow-xl rounded-lg pl-5 p-3 hover:bg-cyan-600 hover:pl-10 hover:text-white hover:shadow-2xl transition-all" onclick="window.location.href='campus_drive_company.php?drive_id=<?php echo $company['driveId']; ?>'">
-                        <div class="flex justify-between items-center cursor-pointer toggle-rounds" data-company-id="<?php echo $company['driveId']; ?>">
-                            <div class="flex items-center">
-                            <h2 class="text-lg font-bold mr-2"><?php echo $company['company_name']; ?> </h2>
-                            <span> - - | - - <strong>Date & Time: </strong> 
-                                <?php
-                                if($company['date'] && $company['time']){
-                                    echo $company['date'] ? date("d/m/Y", strtotime($company['date'])) : "";
-                                    echo " - ";
-                                    echo $company['time'] ? date("g:i A", strtotime($company['time'])) : "";
-                                }
-                                else{
-                                    echo "Will be declared";
-                                }
-                                ?>
-                            </span>
-                        </div>
-                        </div>
-                    </div>
-                <?php endwhile; ?>
+            <!-- Display Companies in Table -->
+            <div id="companies-grid">
+                <table id="companies-table" class="min-w-full bg-white shadow-md rounded-md table-fixed">
+                    <thead>
+                        <tr class="bg-gray-700 text-white">
+                            <th class="border px-4 py-2 rounded-tl-md w-1/12">No</th>
+                            <th class="border px-4 py-2 w-5/12">Company Name</th>
+                            <th class="border px-4 py-2 w-3/12">Date</th>
+                            <th class="border px-4 py-2 rounded-tr-md w-3/12">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $counter = 1;
+                        while ($company = mysqli_fetch_assoc($companies_result)): 
+                        ?>
+                            <tr class="hover:bg-gray-200 hover:font-bold cursor-pointer transition-all" onclick="window.location.href='campus_drive_company.php?drive_id=<?php echo $company['driveId']; ?>'">
+                                <td class="border px-4 py-2 text-center"><?php echo $counter; ?></td>
+                                <td class="border px-4 py-2"><?php echo $company['company_name']; ?></td>
+                                <td class="border px-4 py-2 text-center"><?php echo $company['date'] ? date("d/m/Y", strtotime($company['date'])) : "Will be declared"; ?></td>
+                                <td class="border px-4 py-2 text-center"><?php echo $company['time'] ? date("g:i A", strtotime($company['time'])) : "Will be declared"; ?></td>
+                            </tr>
+                        <?php 
+                            $counter++;
+                        endwhile; 
+                        ?>
+                    </tbody>
+                </table>
             </div>
 
             <!-- Campus Placement Details by Batch -->
@@ -140,15 +144,15 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
         // Real-time search function for companies
         function searchCompanies() {
             const searchInput = document.getElementById('search').value.toLowerCase();
-            const companies = document.querySelectorAll('.company-item');
+            const rows = document.querySelectorAll('#companies-table tbody tr');
             
-            companies.forEach(company => {
-                const companyName = company.querySelector('h2').textContent.toLowerCase();
+            rows.forEach(row => {
+                const companyName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
                 
                 if (companyName.includes(searchInput)) {
-                    company.style.display = '';
+                    row.style.display = '';
                 } else {
-                    company.style.display = 'none';
+                    row.style.display = 'none';
                 }
             });
         }
@@ -159,7 +163,7 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
             
             if (batchId) {
                 $.ajax({
-                    url: 'campus_drive.php', // Replace with your PHP file containing the `fetch_companies` logic
+                    url: 'campus_drive.php',
                     method: 'GET',
                     data: { fetch_companies: true, batch_id: batchId },
                     success: function(response) {

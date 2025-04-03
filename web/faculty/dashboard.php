@@ -81,61 +81,62 @@ if ($faculty_count_result && $row = $faculty_count_result->fetch_assoc()) {
 ?>
     <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
             <!-- Holiday Card -->
-            <div class="bg-white border border-yellow-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
+            <div class="bg-white border-2 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
                 onclick="window.location.href='holiday.php';">
-                <div class="flex items-center">
-                <i class="fa-solid fa-sun text-4xl text-yellow-500 "></i>
-                    <h2 class="text-yellow-600 text-xl pl-5 font-semibold ">
-                        Holidays
-                    </h2>
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <div class="w-16 h-16 flex items-center justify-center rounded-full border-2 border-yellow-400">
+                        <i class="fa-solid fa-sun text-2xl text-yellow-400"></i>
+                    </div>
+                    <div class="flex flex-row items-center justify-center space-x-2">
+                        <p id="holiday-count" class="text-xl font-bold text-yellow-500">00</p>
+                        <h2 class="text-yellow-400 text-xl font-semibold">Holidays</h2>
+                    </div>
                 </div>
-                <p id="holiday-count" class="text-5xl font-bold text-yellow-500 ">
-                    00
-                </p>
             </div>
 
 
             <!-- Total Students Card -->
-            <div class="bg-white border border-cyan-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
-            onclick="window.location.href='student_search_page.php';">
-                <div class="flex items-center">
-                <i class="fa-solid fa-users text-3xl text-cyan-500 "></i>
-                    <h2 class="text-cyan-600 text-lg pl-5 font-semibold ">
-                        Total Students
-                    </h2>
+            <div class="bg-white border-2 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
+                onclick="window.location.href='student_search_page.php';">
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <div class="w-16 h-16 flex items-center justify-center rounded-full border-2 border-cyan-500">
+                        <i class="fa-solid fa-users text-2xl text-cyan-500"></i>
+                    </div>
+                    <div class="flex flex-row items-center justify-center space-x-2">
+                        <p id="student-count" class="text-xl font-bold text-cyan-600">00</p>
+                        <h2 class="text-cyan-500 text-xl font-semibold">Students</h2>
+                    </div>
                 </div>
-                <p id="student-count" class="text-5xl font-bold text-cyan-500 ">
-                    00
-                </p>
             </div>
 
 
             <!-- Total Faculties Card -->
-            <div class="bg-white border border-blue-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
-            onclick="window.location.href='faculty_list.php';">
-                <div class="flex items-center">
-                <i class="fa-solid fa-chalkboard-user text-3xl text-blue-500 "></i>
-                    <h2 class="text-blue-600 text-lg pl-5 font-semibold ">
-                        Total Faculties
-                    </h2>
+            <div class="bg-white border-2 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
+                onclick="window.location.href='faculty_list.php';">
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <div class="w-16 h-16 flex items-center justify-center rounded-full border-2 border-blue-500">
+                        <i class="fa-solid fa-chalkboard-user text-2xl text-blue-500"></i>
+                    </div>
+                    <div class="flex flex-row items-center justify-center space-x-2">
+                        <p id="faculty-count" class="text-xl font-bold text-blue-600">00</p>
+                        <h2 class="text-blue-500 text-xl font-semibold">Faculties</h2>
+                    </div>
                 </div>
-                <p id="faculty-count" class="text-5xl font-bold text-blue-500 ">
-                    00
-                </p>
             </div>
 
              <!-- Total subjects Card -->
-             <div class="bg-white border border-green-500 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group">
-                <div class="flex items-center">
-                <i class="fa-solid fa-book text-3xl text-green-500 "></i>
-                    <h2 class="text-green-600 text-lg pl-5 font-semibold ">
-                        Total Subjects
-                    </h2>
+             <div class="bg-white border-2 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group">
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <div class="w-16 h-16 flex items-center justify-center rounded-full border-2 border-green-500">
+                        <i class="fa-solid fa-book text-2xl text-green-500"></i>
+                    </div>
+                    <div class="flex flex-row items-center justify-center space-x-2">
+                        <p id="subject-count" class="text-xl font-bold text-green-600">00</p>
+                        <h2 class="text-green-500 text-xl font-semibold">Subjects</h2>
+                    </div>
                 </div>
-                <p id="subject-count" class="text-5xl font-bold text-green-500 ">
-                    00
-                </p>
             </div>
 
 

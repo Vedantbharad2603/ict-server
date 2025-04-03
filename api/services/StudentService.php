@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../db/db_connection.php';
 
-function ParentOutService($username) {
+function StudentLogoutService($username) {
     global $conn; // Use global DB connection
 
     // Sanitize input
@@ -23,7 +23,7 @@ function ParentOutService($username) {
 }
 
 
-function ParentService($username, $password, $device_token) {
+function StudentLoginService($username, $password, $device_token) {
     global $conn; // Use global DB connection
 
     // Sanitize input
@@ -48,7 +48,7 @@ function ParentService($username, $password, $device_token) {
     }
 
     // Proceed to call the stored procedure
-    $stmt = $conn->prepare("CALL LoginParent(?)");
+    $stmt = $conn->prepare("CALL LoginStudent(?)");
     if (!$stmt) {
         return ['status' => false, 'message' => 'Failed to prepare the stored procedure'];
     }
@@ -88,53 +88,4 @@ function ParentService($username, $password, $device_token) {
     return ['status' => false, 'message' => 'Invalid username or password'];
 }
 
-function GetFacultyContactService($studentId) {
-    global $conn; 
-
-    $stmt = $conn->prepare("CALL GetFacultyContactByStudent(?)");
-    if (!$stmt) {
-        return ['status' => false, 'message' => 'Failed to prepare the stored procedure'];
-    }
-    $stmt->bind_param("i", $studentId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-        $faculty_data = [];
-        while ($row = $result->fetch_assoc()) {
-            $faculty_data[] = $row;
-        }
-        $stmt->close();
-        if (count($faculty_data) > 0) {
-            return ['status' => true, 'data' => $faculty_data];
-        }else{
-            return ['status' => false, 'message' => 'Invalid Student Id'];
-        }
-    $stmt->close();
-    http_response_code(401); // Unauthorized
-    return ['status' => false, 'message' => 'Invalid Student Id'];
-}
-
-function GetStudentTimetableService($studentId) {
-    global $conn; 
-
-    $stmt = $conn->prepare("CALL GetStudentTimetable(?)");
-    if (!$stmt) {
-        return ['status' => false, 'message' => 'Failed to prepare the stored procedure'];
-    }
-    $stmt->bind_param("i", $studentId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-        $subject_data = [];
-        while ($row = $result->fetch_assoc()) {
-            $subject_data[] = $row;
-        }
-        $stmt->close();
-        if (count($subject_data) > 0) {
-            return ['status' => true, 'data' => $subject_data];
-        }else{
-            return ['status' => false, 'message' => 'Invalid Student Id'];
-        }
-    $stmt->close();
-    http_response_code(401); // Unauthorized
-    return ['status' => false, 'message' => 'Invalid Student Id'];
-}
 ?>

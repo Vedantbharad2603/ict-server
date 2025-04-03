@@ -38,7 +38,7 @@ function ParentLogoutController($input) {
     $response = ParentOutService($username);
 
     if ($response['status']) {
-        echo json_encode($response['data']);
+        echo json_encode($response['message']);
     } else {
         echo json_encode(['message' => $response['message']]);
     }

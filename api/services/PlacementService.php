@@ -2,65 +2,65 @@
 
 require_once __DIR__ . '/../db/db_connection.php';
 
-function AddZoomLinkService($zoomLink, $zoomDate, $zoomTime, $zoomTitle, $semInfoId, $facultyInfoId) {
+function RecentlyPlacedService($batchId) {
     global $conn;
-
     try {
-        $stmt = $conn->prepare("CALL AddZoomLink(?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssii", $zoomLink, $zoomDate, $zoomTime, $zoomTitle, $semInfoId, $facultyInfoId);
-        $stmt->execute();
-
-        return ['status' => true, 'message' => 'Zoom link added successfully'];
-    } catch (Exception $e) {
-        return ['status' => false, 'message' => $e->getMessage()];
-    }
-}
-
-function EditZoomLinkService($id, $zoomLink, $zoomDate, $zoomTime, $zoomTitle, $semInfoId, $facultyInfoId) {
-    global $conn;
-
-    try {
-        $stmt = $conn->prepare("CALL EditZoomLink(?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("issssii", $id, $zoomLink, $zoomDate, $zoomTime, $zoomTitle, $semInfoId, $facultyInfoId);
-        $stmt->execute();
-
-        return ['status' => true, 'message' => 'Zoom link updated successfully'];
-    } catch (Exception $e) {
-        return ['status' => false, 'message' => $e->getMessage()];
-    }
-}
-
-function DeleteZoomLinkService($id) {
-    global $conn;
-
-    try {
-        $stmt = $conn->prepare("CALL DeleteZoomLink(?)");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-
-        return ['status' => true, 'message' => 'Zoom link deleted successfully'];
-    } catch (Exception $e) {
-        return ['status' => false, 'message' => $e->getMessage()];
-    }
-}
-
-function GetUpcomingZoomLinksService($id) {
-    global $conn;
-
-    try {
-        $stmt = $conn->prepare("CALL GetUpcomingZoomLinks(?)");
-        $stmt->bind_param("i", $id);
+        $stmt = $conn->prepare("CALL recentlyPlacedStudents(?)");
+        $stmt->bind_param("s",$batchId);
         $stmt->execute();
         $result = $stmt->get_result();
-
-        $links = [];
+        $studentsList = [];
         while ($row = $result->fetch_assoc()) {
-            $links[] = $row;
+            $studentsList[] = $row;
         }
 
-        return ['status' => true, 'data' => $links];
+        return ['status' => true, 'data' => $studentsList];
     } catch (Exception $e) {
         return ['status' => false, 'message' => $e->getMessage()];
     }
 }
+
+function GetCompanyListService() {
+    global $conn; // Assuming $conn is your database connection object
+
+    try {
+        $stmt = $conn->prepare("SELECT * FROM company_info order by company_name");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $companyList = [];
+        while ($row = $result->fetch_assoc()) {
+            $companyList[] = $row;
+        }
+        return ['status' => true, 'data' => $companyList];
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
+    }
+}
+
+function GetCampusDriveStudentListService($studentId,$batchId) {
+    global $conn;
+
+    try {
+        $stmt = $conn->prepare("CALL GetCampusDriveByStudent(?,?)");
+        $stmt->bind_param("ii",$studentId,$batchId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $campusDriveList = [];
+        while ($row = $result->fetch_assoc()) {
+            $campusDriveList[] = $row;
+        }
+        return ['status' => true, 'data' => $campusDriveList];
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
+    }
+}
+
 ?>

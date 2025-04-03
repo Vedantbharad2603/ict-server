@@ -1,29 +1,21 @@
 <?php
 
-require_once __DIR__ . '/../controllers/PlacementController.php';
+require_once __DIR__ . '/../controllers/StudentController.php';
 
-function PlacementRoutes($method, $subpath) {
+function StudentRoutes($method, $subpath) {
     $input = json_decode(file_get_contents('php://input'), true);
     switch ($subpath) {
-        case 'recentlyPlaced': // Handle "Placement/recentlyPlaced"
+        case 'login': // Handle "Student/Login"
             if ($method === 'POST') {
-                RecentlyPlaced($input);
+                StudentLoginController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
                 echo json_encode(['message' => 'Method not allowed']);
             }
             break;
-        case 'companyList': // Handle "Placement/companyList"
-            if ($method === 'GET') {
-                CompanyList();
-            } else {
-                http_response_code(405); // Method Not Allowed
-                echo json_encode(['message' => 'Method not allowed']);
-            }
-            break;
-        case 'campusDriveByStudentList': // Handle "Placement/campusDriveByStudentList"
+        case 'logout': // Handle "Student/Logutn"
             if ($method === 'POST') {
-                CampusDriveStudentList($input);
+                StudentLogoutController($input);
             } else {
                 http_response_code(405); // Method Not Allowed
                 echo json_encode(['message' => 'Method not allowed']);

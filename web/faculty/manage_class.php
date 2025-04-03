@@ -56,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['classname'])) {
     $class_id = isset($_POST['class_id']) ? $_POST['class_id'] : null;
 
     if ($class_id) {
-        // Update class info
         $update_query = "UPDATE class_info SET classname='$classname', sem_info_id='$sem_id', batch='$batch', faculty_info_id='$faculty_id' WHERE id='$class_id'";
         if (mysqli_query($conn, $update_query)) {
             echo json_encode(['status' => 'success', 'message' => 'Class updated successfully!']);
@@ -64,10 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['classname'])) {
             echo json_encode(['status' => 'error', 'message' => 'Error updating class. Please try again.']);
         }
     } else {
-        // Insert new class
         $insert_query = "INSERT INTO class_info (classname, sem_info_id, batch, faculty_info_id) 
                          VALUES ('$classname', '$sem_id', '$batch', '$faculty_id')";
-
         if (mysqli_query($conn, $insert_query)) {
             echo json_encode(['status' => 'success', 'message' => 'Class created successfully!']);
         } else {
@@ -80,10 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['classname'])) {
 // Check if AJAX request is made for deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $class_id = $_POST['class_id'];
-
-    // Delete class from class_info table
     $delete_query = "DELETE FROM class_info WHERE id = $class_id";
-
     if (mysqli_query($conn, $delete_query)) {
         echo json_encode(['status' => 'success', 'message' => 'Class deleted successfully!']);
     } else {
@@ -103,7 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -113,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
-
 <body class="bg-gray-100 text-gray-800 flex h-screen overflow-hidden">
     <?php include('./sidebar.php'); ?>
 
@@ -123,36 +115,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
         include('./navbar.php');
         ?>
 
-        <div class="p-5 grid grid-cols-1 gap-4">
-            <?php
-            $sem_query = "SELECT id, sem, edu_type FROM sem_info";
-            $sem_result = mysqli_query($conn, $sem_query);
+        <div class="p-5">
+            <!-- Degree Semester Tabs -->
+            <div id="degree-tabs" class="bg-white shadow-xl rounded-xl p-3 mb-4">
+                <h3 class="text-md font-bold pl-5 pt-2 mb-2">Degree Semesters</h3>
+                <div class="flex border-b">
+                    <?php
+                    $sem_query = "SELECT id, sem, edu_type FROM sem_info WHERE edu_type = 'Degree'";
+                    $sem_result = mysqli_query($conn, $sem_query);
+                    $first_degree = true;
 
-            if (mysqli_num_rows($sem_result) > 0) {
-                while ($sem_row = mysqli_fetch_assoc($sem_result)) {
-                    echo "
-                    <div class='bg-white pl-5 shadow-xl rounded-xl p-3  hover:pl-10  hover:shadow-2xl transition-all cursor-pointer' onclick='fetchClassInfo({$sem_row['id']}, this)'>
-                        <div class='flex justify-between items-center'>
-                            <h3 class='text-md font-bold'>Sem : {$sem_row['sem']} - " . strtoupper($sem_row['edu_type']) . "</h3>
-                            <button 
-                                class='transition-all bg-gray-100 drop-shadow-lg text-green-600 mr-4 font-bold text-sm px-4 py-1 rounded-lg hover:scale-110' 
-                                onclick='event.stopPropagation(); openCreateClassPopup({$sem_row['id']}, \"{$sem_row['sem']}\", \"" . strtoupper($sem_row['edu_type']) . "\")'>
-                                Create Class
-                            </button>
-                        </div>
-                        <div class='class-list hidden mt-4'></div>
-                    </div>";
-                }
-            } else {
-                echo "<p>No semesters available</p>";
-            }
-            ?>
+                    if (mysqli_num_rows($sem_result) > 0) {
+                        while ($sem_row = mysqli_fetch_assoc($sem_result)) {
+                            echo "
+                            <button class='sem-tab-button px-4 py-2 -mb-px border-b-2 " . ($first_degree ? 'border-cyan-500 text-cyan-500' : 'border-transparent text-gray-600') . " hover:text-cyan-500 hover:border-cyan-500' 
+                                data-sem-id='{$sem_row['id']}' data-tab='sem-tab-{$sem_row['id']}'>
+                                Sem {$sem_row['sem']}
+                            </button>";
+                            $first_degree = false;
+                        }
+                    } else {
+                        echo "<p class='pl-5 text-gray-600'>No Degree semesters available</p>";
+                    }
+                    ?>
+                </div>
+            </div>
+
+            <!-- Diploma Semester Tabs -->
+            <div id="diploma-tabs" class="bg-white shadow-xl rounded-xl p-3 mb-4">
+                <h3 class="text-md font-bold pl-5 pt-2 mb-2">Diploma Semesters</h3>
+                <div class="flex border-b">
+                    <?php
+                    $sem_query = "SELECT id, sem, edu_type FROM sem_info WHERE edu_type = 'Diploma'";
+                    $sem_result = mysqli_query($conn, $sem_query);
+                    $first_diploma = true;
+
+                    if (mysqli_num_rows($sem_result) > 0) {
+                        while ($sem_row = mysqli_fetch_assoc($sem_result)) {
+                            echo "
+                            <button class='sem-tab-button px-4 py-2 -mb-px border-b-2 " . ($first_diploma && !$first_degree ? 'border-cyan-500 text-cyan-500' : 'border-transparent text-gray-600') . " hover:text-cyan-500 hover:border-cyan-500' 
+                                data-sem-id='{$sem_row['id']}' data-tab='sem-tab-{$sem_row['id']}'>
+                                Sem {$sem_row['sem']}
+                            </button>";
+                            $first_diploma = false;
+                        }
+                    } else {
+                        echo "<p class='pl-5 text-gray-600'>No Diploma semesters available</p>";
+                    }
+                    ?>
+                </div>
+            </div>
+
+            <!-- Class Tabs Container -->
+            <div id="class-tabs-container" class="bg-white shadow-xl rounded-xl p-3">
+                <div id="class-tabs"></div>
+            </div>
         </div>
     </div>
 
     <div id="create-class-popup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
         <div class="bg-white p-8 rounded-lg w-4/12">
-            <h3 class="text-xl font-bold mb-4">Create New Class</h3>
+            <h3 class="text-xl font-bold mb-4" id="popup-title">Create New Class</h3>
             <form id="create-class-form" action="manage_class.php" method="POST">
                 <input type="hidden" name="sem_id" id="popup-sem-id">
                 <input type="hidden" name="class_id" id="popup-class-id">
@@ -188,54 +211,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
     </div>
 
     <script>
-    function fetchClassInfo(semId, semCard) {
+    $(document).ready(function() {
+        // Load classes for the first active semester on page load
+        const firstSemTab = $('.sem-tab-button.border-cyan-500');
+        if (firstSemTab.length) {
+            const semId = firstSemTab.data('sem-id');
+            fetchClassInfo(semId, $('#class-tabs')[0]);
+        }
+
+        // Semester tab switching for both Degree and Diploma
+        $('.sem-tab-button').on('click', function() {
+            const semId = $(this).data('sem-id');
+            $('.sem-tab-button').removeClass('border-cyan-500 text-cyan-500').addClass('border-transparent text-gray-600');
+            $(this).removeClass('border-transparent text-gray-600').addClass('border-cyan-500 text-cyan-500');
+            fetchClassInfo(semId, $('#class-tabs')[0]);
+        });
+    });
+
+    function fetchClassInfo(semId, tabContainer) {
         $.ajax({
             url: '',
             type: 'POST',
             data: { sem_id: semId },
-            success: function (response) {
+            success: function(response) {
                 const responseData = JSON.parse(response);
-                const classListDiv = $(semCard).find('.class-list');
+                const $tabContainer = $(tabContainer);
 
-                classListDiv.empty();
+                $tabContainer.empty();
 
+                let tabsHtml = '<div class="flex border-b">';
                 if (responseData.classes.length > 0) {
-                    let classInfoHtml = '<ul>';
-                    responseData.classes.forEach(classItem => {
-                        classInfoHtml += `
-                            <li class="bg-gray-100 border-2 transition-all text-gray-600 p-2 mb-2 pl-4 mr-8 hover:pl-8 rounded-xl">
+                    responseData.classes.forEach((classItem, index) => {
+                        tabsHtml += `
+                            <button class="class-tab-button px-4 py-2 -mb-px border-b-2 ${index === 0 ? 'border-cyan-500 text-cyan-500' : 'border-transparent text-gray-600'} hover:text-cyan-500 hover:border-cyan-500" data-tab="tab-${classItem.class_id}">
+                                ${classItem.classname} - ${classItem.batch.toUpperCase()}
+                            </button>`;
+                    });
+                }
+                // Add Create Class tab
+                tabsHtml += `
+                    <button class="class-tab-button px-4 py-2 -mb-px border-b-2 border-transparent text-gray-600 hover:text-cyan-500 hover:border-cyan-500" data-tab="tab-create-${semId}">
+                        + Create Class
+                    </button>
+                </div>`;
+
+                // Tab content
+                let contentHtml = '<div class="tab-content mt-4">';
+                if (responseData.classes.length > 0) {
+                    responseData.classes.forEach((classItem, index) => {
+                        contentHtml += `
+                            <div id="tab-${classItem.class_id}" class="tab-pane ${index === 0 ? '' : 'hidden'} p-4 bg-gray-50 rounded-b-xl">
                                 <div class="flex justify-between items-center">
                                     <h3 class="text-md text-gray-600 font-semibold">
                                         ${classItem.classname} - ${classItem.batch.toUpperCase()} - ${classItem.faculty_name}
                                     </h3>
                                     <div>
-                                        <button onclick="editClass(${classItem.class_id}, '${classItem.classname}', '${classItem.batch}', ${classItem.faculty_id})" 
+                                        <button onclick="editClass(${classItem.class_id}, '${classItem.classname}', '${classItem.batch}', ${classItem.faculty_id}, ${semId})" 
                                             class="border-blue-500 text-sm font-bold border-2 border-blue-600 text-blue-600 px-4 py-1 rounded-full hover:bg-blue-600 hover:text-white mr-2">
                                             Edit
                                         </button>
-                                        <button onclick="deleteClass(${classItem.class_id})" 
+                                        <button onclick="deleteClass(${classItem.class_id}, ${semId})" 
                                             class="border-red-500 text-sm font-bold border-2 border-red-600 text-red-600 px-4 py-1 rounded-full hover:bg-red-600 hover:text-white">
                                             Delete
                                         </button>
                                     </div>
                                 </div>
-                            </li>`;
+                            </div>`;
                     });
-                    classInfoHtml += '</ul>';
-                    classListDiv.html(classInfoHtml);
                 } else {
-                    classListDiv.html('<p class="text-sm text-white-500">No classes found for this semester.</p>');
+                    contentHtml += `<div id="tab-no-classes-${semId}" class="tab-pane hidden p-4 bg-gray-50 rounded-b-xl">
+                        <p class="text-sm text-gray-500">No classes found for this semester.</p>
+                    </div>`;
                 }
+                contentHtml += `
+                    <div id="tab-create-${semId}" class="tab-pane ${responseData.classes.length === 0 ? '' : 'hidden'} p-4 bg-gray-50 rounded-b-xl">
+                        <button class="transition-all bg-gray-100 drop-shadow-lg text-green-600 font-bold text-sm px-4 py-1 rounded-lg hover:scale-110" 
+                            onclick="openCreateClassPopup(${semId})">
+                            Create New Class
+                        </button>
+                    </div>
+                </div>`;
 
-                classListDiv.stop().slideToggle(200);
+                $tabContainer.html(tabsHtml + contentHtml);
+
+                // Class tab switching logic
+                $tabContainer.find('.class-tab-button').on('click', function() {
+                    const tabId = $(this).data('tab');
+                    $tabContainer.find('.class-tab-button').removeClass('border-cyan-500 text-cyan-500').addClass('border-transparent text-gray-600');
+                    $(this).removeClass('border-transparent text-gray-600').addClass('border-cyan-500 text-cyan-500');
+                    $tabContainer.find('.tab-pane').addClass('hidden');
+                    $tabContainer.find(`#${tabId}`).removeClass('hidden');
+                });
             },
-            error: function () {
+            error: function() {
                 Swal.fire('Error', 'Unable to fetch class info. Please try again.', 'error');
             }
         });
     }
 
-    function deleteClass(classId) {
+    function deleteClass(classId, semId) {
         Swal.fire({
             title: 'Are you sure?',
             text: 'This will permanently delete the class.',
@@ -248,14 +322,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
                     url: '',
                     type: 'POST',
                     data: { action: 'delete', class_id: classId },
-                    success: function (response) {
+                    success: function(response) {
                         const result = JSON.parse(response);
                         Swal.fire(result.status === 'success' ? 'Deleted!' : 'Error', result.message, result.status);
                         if (result.status === 'success') {
-                            fetchClassInfo(classId); // Optionally reload class list
+                            fetchClassInfo(semId, $('#class-tabs')[0]);
                         }
                     },
-                    error: function () {
+                    error: function() {
                         Swal.fire('Error', 'Unable to delete class. Please try again.', 'error');
                     }
                 });
@@ -263,42 +337,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sem_id'])) {
         });
     }
 
-    function editClass(classId, classname, batch, facultyId) {
+    function editClass(classId, classname, batch, facultyId, semId) {
         document.getElementById('popup-class-id').value = classId;
         document.getElementById('classname').value = classname;
-        document.getElementById('batch').value = batch.toUpperCase;
+        document.getElementById('batch').value = batch.toUpperCase();
         document.getElementById('faculty_id').value = facultyId;
-        document.getElementById('popup-sem-id').disabled = true; // Keep semester ID hidden for editing
-        openCreateClassPopup(classId); // Open the popup for editing
+        document.getElementById('popup-sem-id').value = semId;
+        document.getElementById('popup-title').textContent = 'Edit Class';
+        document.getElementById('popup-submit').textContent = 'Update';
+        document.getElementById('create-class-popup').classList.remove('hidden');
     }
 
     function openCreateClassPopup(semId) {
         document.getElementById('popup-sem-id').value = semId;
+        document.getElementById('popup-class-id').value = '';
+        document.getElementById('classname').value = '';
+        document.getElementById('batch').value = 'A';
+        document.getElementById('faculty_id').value = '';
+        document.getElementById('popup-title').textContent = 'Create New Class';
+        document.getElementById('popup-submit').textContent = 'Create';
         document.getElementById('create-class-popup').classList.remove('hidden');
     }
 
     function closePopup() {
         document.getElementById('create-class-popup').classList.add('hidden');
-        document.getElementById('popup-sem-id').disabled = false; // Re-enable semester field for new class creation
     }
 
-    $('#create-class-form').submit(function (e) {
+    $('#create-class-form').submit(function(e) {
         e.preventDefault();
-
         $.ajax({
             url: '',
             type: 'POST',
             data: $(this).serialize(),
-            success: function (response) {
+            success: function(response) {
                 const result = JSON.parse(response);
                 Swal.fire(result.status === 'success' ? 'Success' : 'Error', result.message, result.status);
                 if (result.status === 'success') {
                     closePopup();
-                    fetchClassInfo($('#popup-sem-id').val()); // Reload class info
+                    fetchClassInfo($('#popup-sem-id').val(), $('#class-tabs')[0]);
                 }
             },
-            error: function () {
-                Swal.fire('Error', 'Unable to create class. Please try again.', 'error');
+            error: function() {
+                Swal.fire('Error', 'Unable to process request. Please try again.', 'error');
             }
         });
     });

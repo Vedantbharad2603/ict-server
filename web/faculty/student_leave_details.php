@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mysqli_query($conn, $update_query)) {
         echo "success";
         $message = ($status === 'approved') ? "Your leave is APPROVED!" : "Your leave is DECLINED!";
-        sendFCMNotification($leave['gr_no'],"Leave Request",$message);
+        sendFCMNotification($leave['gr_no'],$message,$reply);
     } else {
         echo "error: " . mysqli_error($conn); // Output the error for debugging
     }
@@ -181,7 +181,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         document.getElementById("updateBtn").addEventListener("click", function () {
             let reply = document.getElementById("replyText").value;
             let leaveId = "<?php echo $leave_id; ?>"; // Pass the leave ID to the AJAX request
-            
+            Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while the meeting is being saved.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
             $.ajax({
                 url: "<?php echo $_SERVER['PHP_SELF']; ?>?leave_id=" + leaveId,
                 type: "POST",
@@ -199,7 +206,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             window.location.href = "students_leave.php";
                         });
                     } else {
-                        Swal.fire("Error!", "Failed to update leave status: " + response, "error");
+                        Swal.fire("Error!", "Failed to update leave status ", "error");
                     }
                 },
                 error: function () {

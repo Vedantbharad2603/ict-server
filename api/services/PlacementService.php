@@ -83,5 +83,27 @@ function StatusUpdateCampusDriveService($studentId, $driveId, $status) {
     }
 }
 
+function GetCampusDriveRoundsByStudentService($studentId,$batchId) {
+    global $conn;
+
+    try {
+        $stmt = $conn->prepare("CALL GetCampusDriveRoundsByStudent(?,?)");
+        $stmt->bind_param("ii",$studentId,$batchId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $campusDriveRoundsList = [];
+        while ($row = $result->fetch_assoc()) {
+            $campusDriveRoundsList[] = $row;
+        }
+        return ['status' => true, 'data' => $campusDriveRoundsList];
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
+    }
+}
+
 
 ?>

@@ -66,5 +66,20 @@ function StatusUpdateCampusDrive($input) {
     }
 }
 
+function CampusDriveStudentRoundsList($input) {
+    if (!isset($input['batch_id'])||!isset($input['student_id'])) {
+        http_response_code(400); // Bad Request
+        echo json_encode(['message' => 'Batch id is required and Student id is required']);
+        return;
+    }
+    $batchId = $input['batch_id'];
+    $studentId = $input['student_id'];
+    $response = GetCampusDriveRoundsByStudentService($studentId,$batchId);
 
+    if ($response['status']) {
+        echo json_encode($response['data']);
+    } else {
+        echo json_encode(['message' => $response['message']]);
+    }
+}
 ?>

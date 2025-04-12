@@ -89,7 +89,7 @@ $color = "cyan";
                             <div class="w-full h-10 flex items-center px-5 text-grey-500 transition bg-transparent hover:bg-<?php echo $color; ?>-600 hover:text-white active:bg-<?php echo $color; ?>-900 <?php echo $radious; ?> justify-between group">
                                 Students Leave Request
                                 <?php if ($pending_leave > 0): ?>
-                                    <div class="bg-<?php echo $color; ?>-600 text-grey-500 px-3 py-1 rounded-md transition-colors duration-300 group-hover ">
+                                    <div class="bg-<?php echo $color; ?>-600 text-white  px-2 py-1 rounded-full transition-colors duration-300 group-hover:bg-white group-hover:text-<?php echo $color; ?>-600">
                                         <?php echo $pending_leave; ?>
                                     </div>
                                 <?php endif; ?>

@@ -63,4 +63,25 @@ function GetCampusDriveStudentListService($studentId,$batchId) {
     }
 }
 
+function StatusUpdateCampusDriveService($studentId, $driveId, $status) {
+    global $conn;
+
+    try {
+        $stmt = $conn->prepare("CALL statusUpdateCampusDrive(?, ?, ?)");
+        $stmt->bind_param("iis", $studentId, $driveId, $status);
+        if ($stmt->execute()) {
+            return ['status' => true, 'message' => 'Status updated successfully'];
+        } else {
+            return ['status' => false, 'message' => 'Failed to update status'];
+        }
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
+    }
+}
+
+
 ?>

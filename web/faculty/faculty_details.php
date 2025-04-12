@@ -130,10 +130,10 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : null;
                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-all">
                     Edit
                 </a>
-                <button onclick="promptDelete('<?php echo htmlspecialchars($session_faculty_name); ?>')" 
-                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-all">
-                    Delete
-                </button>
+                <a href="faculty_punch_details.php?faculty_id=<?php echo $faculty_id; ?>&faculty_name=<?php echo $faculty['first_name'] . ' ' . $faculty['last_name']; ?>" 
+                   class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-all">
+                    Punch Details
+                </a>
             </div>
             <div class="bg-white rounded-lg shadow-md p-6 max-w-5xl">
                 <div class="flex flex-col md:flex-row gap-6">
@@ -183,8 +183,13 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : null;
                             <span class="value text-cyan-500"><?php echo $faculty['full_address'] ?? 'N/A'; ?></span>
                         </div>
                     </div>
+                    
                 </div>
             </div>
+            <button onclick="promptDelete('<?php echo htmlspecialchars($session_faculty_name); ?>')" 
+                        class="bg-red-500 hover:bg-red-600 text-white mt-5 px-4 py-2 rounded-md transition-all">
+                    Delete Faculty  
+                </button>
         </div>
     </div>
 

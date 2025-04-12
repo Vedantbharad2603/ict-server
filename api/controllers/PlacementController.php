@@ -43,4 +43,28 @@ function CampusDriveStudentList($input) {
         echo json_encode(['message' => $response['message']]);
     }
 }
+
+function StatusUpdateCampusDrive($input) {
+    if (!isset($input['student_id']) || !isset($input['campus_drive_id']) || !isset($input['status'])) {
+        http_response_code(400); // Bad Request
+        echo json_encode(['message' => 'Student id, Campus drive id, and Status are required']);
+        return;
+    }
+
+    $studentId = $input['student_id'];
+    $driveId = $input['campus_drive_id'];
+    $status = $input['status'];
+
+    $response = StatusUpdateCampusDriveService($studentId, $driveId, $status);
+
+    if ($response['status']) {
+        http_response_code(200);
+        echo json_encode(['message' => $response['message']]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['message' => $response['message']]);
+    }
+}
+
+
 ?>

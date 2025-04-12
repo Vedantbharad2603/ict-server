@@ -195,4 +195,48 @@ function handleUploadExtraAttendance($input) {
     }
 }
 
+
+
+// Faculty 
+
+
+function FetchAttendanceInfo($input) {
+    if (!isset($input['faculty_info_id']) || !isset($input['date'])) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Faculty ID and date are required']);
+        return;
+    }
+    $response = FetchAttendanceInfoService($input['faculty_info_id'], $input['date']);
+    echo json_encode($response);
+}
+
+function PunchIn($input) {
+    if (!isset($input['faculty_info_id']) || !isset($input['punch_in'])) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Faculty ID and punch in time are required']);
+        return;
+    }
+    $response = PunchInService($input['faculty_info_id'],$input['date'],$input['punch_in']);
+    echo json_encode($response);
+}
+
+function PunchOut($input) {
+    if (!isset($input['faculty_info_id']) || !isset($input['date']) || !isset($input['punch_out'])) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Faculty ID, date and punch out time are required']);
+        return;
+    }
+    $response = PunchOutService($input['faculty_info_id'], $input['date'], $input['punch_out']);
+    echo json_encode($response);
+}
+
+function GetAttendanceHistory($input) {
+    if (!isset($input['faculty_info_id'])) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Faculty ID is required']);
+        return;
+    }
+    $response = GetAttendanceHistoryService($input['faculty_info_id']);
+    echo json_encode($response);
+}
 ?>

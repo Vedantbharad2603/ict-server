@@ -346,4 +346,144 @@ function uploadExtraAttendance($attendanceData) {
 
     return $response;
 }
+
+
+
+// For faculty
+
+function isHolidayOrSunday($date) {
+    global $conn;
+    try {
+        // Check if it's Sunday
+        $dayOfWeek = date('w', strtotime($date)); // 0 = Sunday, 6 = Saturday
+        if ($dayOfWeek == 0) {
+            return true;
+        }
+
+        // Check if it's a holiday
+        $stmt = $conn->prepare("SELECT id FROM holiday_info WHERE holiday_date = ?");
+        $stmt->bind_param("s", $date);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->num_rows > 0;
+    } catch (Exception $e) {
+        return false; // Default to false if there's an error
+    } finally {
+        if (isset($stmt)) $stmt->close();
+    }
+}
+
+function    FetchAttendanceInfoService($facultyId, $date) {
+    global $conn;
+    try {
+        if (isHolidayOrSunday($date)) {
+            return [
+                'status' => false,
+                'message' => 'Today is a holiday or Sunday',
+                'data' => null
+            ];
+        }
+
+        $stmt = $conn->prepare("SELECT * FROM faculty_attendance_info WHERE faculty_info_id = ? AND date = ?");
+        $stmt->bind_param("is", $facultyId, $date);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $attendance = $result->fetch_assoc();
+        return [
+            'status' => true,
+            'data' => $attendance ? $attendance : null,
+            'message' => $attendance ? 'Record found' : 'No record found for this date'
+        ];
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) $stmt->close();
+    }
+}
+
+function PunchInService($facultyId,$date,$punchInTime) {
+    global $conn;
+    try {
+        if (isHolidayOrSunday($date)) {
+            return [
+                'status' => false,
+                'message' => 'Cannot punch in on a holiday or Sunday'
+            ];
+        }
+
+        $checkStmt = $conn->prepare("SELECT id FROM faculty_attendance_info WHERE faculty_info_id = ? AND date = ?");
+        $checkStmt->bind_param("is", $facultyId, $date);
+        $checkStmt->execute();
+        if ($checkStmt->get_result()->num_rows > 0) {
+            return ['status' => false, 'message' => 'Attendance already recorded for today'];
+        }
+        
+        $stmt = $conn->prepare("INSERT INTO faculty_attendance_info (punch_in, date, faculty_info_id) VALUES (?, ?, ?)");
+        $stmt->bind_param("ssi", $punchInTime, $date, $facultyId);
+        $stmt->execute();
+        
+        return ['status' => true, 'message' => 'Punch in recorded successfully'];
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) $stmt->close();
+        if (isset($checkStmt)) $checkStmt->close();
+    }
+}
+
+function PunchOutService($facultyId, $date, $punchOutTime) {
+    global $conn;
+    try {
+        if (isHolidayOrSunday($date)) {
+            return [
+                'status' => false,
+                'message' => 'Cannot punch out on a holiday or Sunday'
+            ];
+        }
+
+        // Adjust punch out time if after 6:30 PM
+        $punchOutDateTime = DateTime::createFromFormat('H:i:s', $punchOutTime);
+        $sixThirtyPM = DateTime::createFromFormat('H:i:s', '18:30:00');
+        if ($punchOutDateTime > $sixThirtyPM) {
+            $punchOutTime = '18:30:00';
+        }
+
+        $stmt = $conn->prepare("UPDATE faculty_attendance_info SET punch_out = ? WHERE faculty_info_id = ? AND date = ? AND punch_out IS NULL");
+        $stmt->bind_param("sis", $punchOutTime, $facultyId, $date);
+        $stmt->execute();
+        
+        if ($stmt->affected_rows > 0) {
+            return ['status' => true, 'message' => 'Punch out recorded successfully'];
+        }
+        return ['status' => false, 'message' => 'No punch in record found or already punched out'];
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) $stmt->close();
+    }
+}
+
+function GetAttendanceHistoryService($facultyId) {
+    global $conn;
+    try {
+        $stmt = $conn->prepare("SELECT * FROM faculty_attendance_info WHERE faculty_info_id = ? ORDER BY date DESC");
+        $stmt->bind_param("i", $facultyId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $history = [];
+        while ($row = $result->fetch_assoc()) {
+            $history[] = $row;
+        }
+        return [
+            'status' => true,
+            'data' => $history,
+            'message' => count($history) > 0 ? 'History retrieved successfully' : 'No attendance history found'
+        ];
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => $e->getMessage()];
+    } finally {
+        if (isset($stmt)) $stmt->close();
+    }
+}
+
 ?>

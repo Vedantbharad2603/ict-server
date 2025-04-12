@@ -4,12 +4,13 @@ include('../../api/db/db_connection.php');
 $leaves_query = "SELECT li.*, CONCAT(si.first_name, ' ', si.last_name) AS student_name  
                 FROM leave_info li  
                 JOIN student_info si ON li.student_info_id = si.id  
-                ORDER BY FIELD(li.leave_status, 'pending', 'approved', 'declined')";
+                ORDER BY (li.leave_status = 'pending') DESC, li.created_at DESC";
 $leaves_result = mysqli_query($conn, $leaves_query);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +20,7 @@ $leaves_result = mysqli_query($conn, $leaves_query);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 text-gray-800 flex h-screen overflow-hidden">
     <?php include('./sidebar.php'); ?>
     <div class="main-content pl-64 flex-1 overflow-y-auto">
@@ -55,9 +57,8 @@ $leaves_result = mysqli_query($conn, $leaves_query);
                                 <?php echo date("g:i A", strtotime($leave['created_at'])); ?>
                             </td>
                             <td class="border px-4 py-2 text-center">
-                                <?php  
-                                    $bgColor = ($leave['leave_status'] == "pending") ? "bg-yellow-500" : 
-                                              (($leave['leave_status'] == "approved") ? "bg-green-500" : "bg-red-500");
+                                <?php
+                                $bgColor = ($leave['leave_status'] == "pending") ? "bg-yellow-500" : (($leave['leave_status'] == "approved") ? "bg-green-500" : "bg-red-500");
                                 ?>
                                 <span class="p-1 px-2 <?php echo $bgColor; ?> font-bold text-sm rounded-full text-white">
                                     <?php echo strtoupper($leave['leave_status']); ?>
@@ -89,4 +90,5 @@ $leaves_result = mysqli_query($conn, $leaves_query);
         }
     </script>
 </body>
+
 </html>

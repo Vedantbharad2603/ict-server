@@ -117,6 +117,27 @@ function AttendanceRoutes($method, $subpath) {
                 echo json_encode(['message' => 'Method not allowed for this endpoint']);
             }
             break;
+        case 'facultyAttendance': // Handle "Attendance/facultyAttendance"
+        switch ($method) {
+            case 'POST':
+                if (isset($input['action']) && $input['action'] === 'punchIn') {
+                    PunchIn($input);
+                } elseif (isset($input['action']) && $input['action'] === 'punchOut') {
+                    PunchOut($input);
+                } elseif (isset($input['action']) && $input['action'] === 'history') {
+                    GetAttendanceHistory($input);
+                } elseif (isset($input['action']) && $input['action'] === 'primary'){
+                    FetchAttendanceInfo($input);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['message' => 'Invalid action']);
+                }
+                break;
+            default:
+                http_response_code(405);
+                echo json_encode(['message' => 'Method not allowed']);
+        }
+        break;
         default:
             http_response_code(404); // Not Found
             echo json_encode(['message' => 'Invalid Faculty API endpoint']);

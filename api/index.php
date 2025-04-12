@@ -12,6 +12,7 @@ require 'routes/ZoomRoutes.php';
 require 'routes/HolidayRoutes.php';
 require 'routes/ExamRoutes.php';
 require 'routes/LeaveRoutes.php';
+require 'routes/EventRoutes.php';
 
 // Validate API Key
 validateApiKey(); // Check the API key before processing the request
@@ -56,6 +57,9 @@ switch ($endpoint) {
         break;
     case 'Leave':
         LeaveRoutes($method, $subpath);
+        break;
+    case 'Event':
+        EventRoutes($method, $subpath);
         break;
 
     default:

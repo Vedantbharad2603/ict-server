@@ -45,6 +45,14 @@ function PlacementRoutes($method, $subpath) {
                 echo json_encode(['message' => 'Method not allowed']);
             }
             break;
+        case 'addOldData': // Handle Placement/addOldData
+            if ($method === 'POST') {
+                AddOldDataController($input);
+            } else {
+                http_response_code(405);
+                echo json_encode(['message' => 'Method not allowed']);
+            }
+            break;
         default:
             http_response_code(404); // Not Found
             echo json_encode(['message' => 'Invalid Student API endpoint']);

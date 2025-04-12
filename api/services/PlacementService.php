@@ -105,5 +105,39 @@ function GetCampusDriveRoundsByStudentService($studentId,$batchId) {
     }
 }
 
+function addOldDataService($enrollmentNo, $companyInfoId, $date, $data) {
+    global $conn;
+    try {
+        // Step 1: Find student_info_id from enrollment_no
+        $stmt = $conn->prepare("SELECT id FROM student_info WHERE enrollment_no = ?");
+        $stmt->bind_param("s", $enrollmentNo);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            return ['status' => false, 'message' => 'Student not found for enrollment number: ' . $enrollmentNo];
+        }
+
+        $studentInfo = $result->fetch_assoc();
+        $studentInfoId = $studentInfo['id'];
+        $stmt->close();
+
+        // Step 2: Insert into interview_bank
+        $stmt = $conn->prepare("INSERT INTO interview_bank (student_info_id, company_info_id, date, data) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $studentInfoId, $companyInfoId, $date, $data);
+
+        if ($stmt->execute()) {
+            return ['status' => true, 'message' => 'Interview data added successfully'];
+        } else {
+            error_log("Database insert failed: " . $stmt->error);
+            return ['status' => false, 'message' => 'Failed to save interview data'];
+        }
+    } catch (Exception $e) {
+        error_log("Exception: " . $e->getMessage());
+        return ['status' => false, 'message' => 'Error: ' . $e->getMessage()];
+    } finally {
+        if (isset($stmt)) $stmt->close();
+    }
+}
 
 ?>

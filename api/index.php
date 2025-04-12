@@ -13,6 +13,8 @@ require 'routes/HolidayRoutes.php';
 require 'routes/ExamRoutes.php';
 require 'routes/LeaveRoutes.php';
 require 'routes/EventRoutes.php';
+require 'routes/InterviewBankRoutes.php';
+
 
 // Validate API Key
 validateApiKey(); // Check the API key before processing the request
@@ -60,6 +62,9 @@ switch ($endpoint) {
         break;
     case 'Event':
         EventRoutes($method, $subpath);
+        break;
+    case 'InterviewBank':
+        InterviewBankRoutes($method, $subpath);
         break;
 
     default:

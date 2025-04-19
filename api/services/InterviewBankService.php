@@ -25,7 +25,10 @@ function createInterviewBankService($input) {
 
 function getAllInterviewBankService() {
     global $conn;
-    $result = $conn->query("SELECT * FROM interview_bank ORDER BY date DESC");
+    $result = $conn->query("SELECT ib.*,ci.company_name,ci.company_type,concat(si.first_name,' ',si.last_name) as student_name FROM interview_bank ib	
+JOIN company_info ci ON ib.company_info_id = ci.id
+JOIN student_info si ON ib.student_info_id = si.id
+ORDER BY date DESC");
     $data = [];
 
     while ($row = $result->fetch_assoc()) {

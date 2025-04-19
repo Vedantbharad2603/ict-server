@@ -1,5 +1,7 @@
 <?php
 
+use function JmesPath\search;
+
 require_once __DIR__ . '/../services/StudentService.php';
 
 function StudentLoginController($input) {
@@ -39,6 +41,24 @@ function StudentLogoutController($input) {
 
     if ($response['status']) {
         echo json_encode($response['message']);
+    } else {
+        echo json_encode(['message' => $response['message']]);
+    }
+}
+
+function StudentDetailsController($input) {
+    if (!isset($input['enrolment'])) {
+        http_response_code(400); // Bad Request
+        echo json_encode(['message' => 'enrolment required']);
+        return;
+    }
+    $enrolment = $input['enrolment'];
+
+    // Call the service
+    $response = searchStudentByFaculty($enrolment);
+
+    if ($response['status']) {
+        echo json_encode($response);
     } else {
         echo json_encode(['message' => $response['message']]);
     }

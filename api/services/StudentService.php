@@ -88,4 +88,27 @@ function StudentLoginService($username, $password, $device_token) {
     return ['status' => false, 'message' => 'Invalid username or password'];
 }
 
+function searchStudentByFaculty($enrollment) {
+    global $conn;
+
+    try {
+        $stmt = $conn->prepare("CALL GetStudentInfo(?)");
+        $stmt->bind_param("i", $enrollment);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $studentData = $result->fetch_assoc();
+
+        return [
+            'status' => true,
+            'data' => $studentData,
+            'message' => 'Student Data retrieved successfully'];
+    } catch (Exception $e) {
+        error_log("Exception in getFeedbackByFacultyService: " . $e->getMessage());
+        return ['status' => false, 'message' => 'Error: ' . $e->getMessage()];
+    } finally {
+        if (isset($stmt)) $stmt->close();
+    }
+}
+
 ?>

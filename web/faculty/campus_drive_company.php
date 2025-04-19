@@ -116,10 +116,10 @@ if (isset($_POST['drive_id'])) {
                     <!-- Date & Time -->
                     <div>
                         <h2 class="text-xl mb-2 font-semibold flex items-center">
-                            <div class="pl-1.5 py-3 bg-slate-600 rounded mr-2"></div>
+                            <div class="pl-1.5 py-3 bg-cyan-600 rounded mr-2"></div>
                             <span>Date & Time</span>
                         </h2>
-                        <div class="pl-5 text-cyan-600">
+                        <div class="pl-5 text-gray-700">
                             <?php
                             if ($company['date'] && $company['time']) {
                                 echo $company['date'] ? date("d/m/Y", strtotime($company['date'])) : "";
@@ -135,10 +135,10 @@ if (isset($_POST['drive_id'])) {
                     <!-- Work Location -->
                     <div>
                         <h2 class="text-xl mb-2 font-semibold flex items-center">
-                            <div class="pl-1.5 py-3 bg-slate-600 rounded mr-2"></div>
+                            <div class="pl-1.5 py-3 bg-cyan-600 rounded mr-2"></div>
                             <span>Work Location</span>
                         </h2>
-                        <div class="pl-5 text-cyan-600">
+                        <div class="pl-5 text-gray-700">
                             <?php echo $company['location']; ?>
                         </div>
                     </div>
@@ -146,10 +146,10 @@ if (isset($_POST['drive_id'])) {
                     <!-- Job Profile -->
                     <div>
                         <h2 class="text-xl mb-2 font-semibold flex items-center">
-                            <div class="pl-1.5 py-3 bg-slate-600 rounded mr-2"></div>
+                            <div class="pl-1.5 py-3 bg-cyan-600 rounded mr-2"></div>
                             <span>Job Profile</span>
                         </h2>
-                        <div class="pl-5 text-cyan-600">
+                        <div class="pl-5 text-gray-700">
                             <?php echo nl2br(htmlspecialchars($company['job_profile'])); ?>
                         </div>
                     </div>
@@ -157,10 +157,10 @@ if (isset($_POST['drive_id'])) {
                     <!-- Package -->
                     <div>
                         <h2 class="text-xl mb-2 font-semibold flex items-center">
-                            <div class="pl-1.5 py-3 bg-slate-600 rounded mr-2"></div>
+                            <div class="pl-1.5 py-3 bg-cyan-600 rounded mr-2"></div>
                             <span>Package</span>
                         </h2>
-                        <div class="pl-5 text-cyan-600">
+                        <div class="pl-5 text-gray-700">
                             <?php echo nl2br(htmlspecialchars($company['package'])); ?>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ if (isset($_POST['drive_id'])) {
 
                 <!-- Display rounds information -->
                 <h2 class="text-xl mt-5 mb-2 font-semibold flex items-center">
-                    <div class="pl-1.5 py-3 bg-slate-600 rounded mr-2"></div>
+                    <div class="pl-1.5 py-3 bg-cyan-600 rounded mr-2"></div>
                     <span>Selection Process</span>
                 </h2>
 
@@ -178,7 +178,7 @@ if (isset($_POST['drive_id'])) {
                             <li class="mb-3 pl-5">
                                 <div class="flex items-center">
                                     <strong class="mr-2"><?php echo $index + 1; ?>)</strong> <!-- Display index of the loop -->
-                                    <p class="text-cyan-600">
+                                    <p class="text-gray-700">
                                         <?php echo htmlspecialchars($round['round_name']); ?> 
                                         (<?php echo $round['mode']; ?>)
                                     </p>
@@ -191,10 +191,10 @@ if (isset($_POST['drive_id'])) {
                 <?php endif; ?>
 
                 <h2 class="text-xl mt-5 mb-2 font-semibold flex items-center">
-                    <div class="pl-1.5 py-3 bg-slate-600 rounded mr-3"></div>
+                    <div class="pl-1.5 py-3 bg-cyan-600 rounded mr-3"></div>
                     <span>Other info</span>
                 </h2>
-                <div class="pl-5 text-cyan-600">
+                <div class="pl-5 text-gray-700">
                     <?php echo nl2br(htmlspecialchars($company['other_info'])); ?>
                 </div>
 

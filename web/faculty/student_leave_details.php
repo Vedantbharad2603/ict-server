@@ -164,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 document.querySelectorAll(".status-btn").forEach(btn => {
                     btn.classList.remove("bg-green-600", "bg-red-600");
                     btn.classList.add("bg-gray-500");
-                });
+                }); 
 
                 // Apply selected color
                 if (this.dataset.status === "approved") {

@@ -13,6 +13,7 @@ require 'routes/HolidayRoutes.php';
 require 'routes/ExamRoutes.php';
 require 'routes/LeaveRoutes.php';
 require 'routes/EventRoutes.php';
+require 'routes/FeedbackRoutes.php';
 require 'routes/InterviewBankRoutes.php';
 
 
@@ -65,6 +66,9 @@ switch ($endpoint) {
         break;
     case 'InterviewBank':
         InterviewBankRoutes($method, $subpath);
+        break;
+    case 'Feedback':
+        FeedbackRoutes($method, $subpath);
         break;
 
     default:

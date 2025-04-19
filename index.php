@@ -22,9 +22,14 @@ $result = mysqli_query($conn, $query);
 
 $projects = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $projects[] = $row;
+    $video_link = $row['video_link'];
+    // Convert YouTube URLs to embed format
+    if (strpos($video_link, 'youtube.com') !== false || strpos($video_link, 'youtu.be') !== false) {
+        $video_link = preg_replace("/\s*[a-zA-Z\/\/:\.]*youtube.com\/watch\?v=([a-zA-Z0-9\-_]+)([a-zA-Z0-9\/\*\-\_\?\&\;\%\=\.]*)/i", "https://www.youtube.com/embed/$1", $video_link);
+        $video_link = preg_replace("/\s*[a-zA-Z\/\/:\.]*youtu.be\/([a-zA-Z0-9\-_]+)([a-zA-Z0-9\/\*\-\_\?\&\;\%\=\.]*)/i", "https://www.youtube.com/embed/$1", $video_link);
+    }
+    $projects[] = ['video_link' => $video_link, 'title' => $row['title']];
 }
-
 ?>
 
 <html lang="en">
@@ -69,7 +74,6 @@ while ($row = mysqli_fetch_assoc($result)) {
             animation: fadeIn 1.5s ease-in 0.5s forwards;
             opacity: 0;
         }
-        /* Underline effect for active nav item */
         .nav-link {
             position: relative;
         }
@@ -80,27 +84,45 @@ while ($row = mysqli_fetch_assoc($result)) {
             left: 0;
             width: 100%;
             height: 3px;
-            background-color: #06b6d4; /* Cyan-500 */
-            border-radius: 9999px; /* Fully rounded edges (pill shape) */
+            background-color: #06b6d4;
+            border-radius: 9999px;
             transition: all 0.3s ease;
+        }
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 270px;
+        }
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
     </style>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const showMoreBtn = document.getElementById('show-more');
+    const toggleBtn = document.getElementById('toggle-videos');
     const videoItems = document.querySelectorAll('.video-item');
-    let visibleCount = 6;
+    let visibleCount = 8;
 
-    if (showMoreBtn) {
-        showMoreBtn.addEventListener('click', function() {
-            // Get the next 6 hidden items
-            const hiddenItems = Array.from(videoItems).slice(visibleCount, visibleCount + 6);
-            hiddenItems.forEach(item => item.classList.remove('hidden'));
-            visibleCount += 6;
-
-            // Hide the button if all items are visible
-            if (visibleCount >= videoItems.length) {
-                showMoreBtn.style.display = 'none';
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            if (toggleBtn.textContent.includes('Show more')) {
+                // Show more videos
+                const hiddenItems = Array.from(videoItems).slice(visibleCount, visibleCount + 4);
+                hiddenItems.forEach(item => item.classList.remove('hidden'));
+                visibleCount += 4;
+                toggleBtn.textContent = 'Show less...';
+                if (visibleCount >= videoItems.length) {
+                    toggleBtn.textContent = 'Show less...';
+                }
+            } else {
+                // Show less videos
+                const visibleItems = Array.from(videoItems).slice(8);
+                visibleItems.forEach(item => item.classList.add('hidden'));
+                visibleCount = 8;
+                toggleBtn.textContent = 'Show more...';
             }
         });
     }
@@ -109,36 +131,34 @@ document.addEventListener('DOMContentLoaded', function() {
 </head>
 <body class="bg-blue-100 font-sans p-lg">
     <!-- Navbar -->
-    <nav class="bg-gray-100 shadow-lg fixed w-full z-10 top-0">
+    <nav class="bg-gray-100 shadow-lg fixed w-full z-20 top-0">
         <div class="px-6">
             <div class="flex justify-between h-20">
                 <div class="flex">
-                    <!-- Logo -->
                     <a href="./">
-                    <div class="flex-shrink-0 flex items-center">
-                        <img class="h-16 " src="web\assets\images\ict_logo.png" alt="ICT Logo">
-                    </div>
-                    </a>  
+                        <div class="flex-shrink-0 flex items-center">
+                            <img class="h-16" src="web/assets/images/ict_logo.png" alt="ICT Logo">
+                        </div>
+                    </a>
                 </div>
-                <!-- Menu Items -->
                 <div class="flex items-center space-x-2">
                     <a id="nav-home" href="#home" class="nav-link relative rounded-xl text-gray-700 hover:bg-gray-200 hover:scale-110 hover:rounded-xl hover:text-md px-6 py-3 text-sm font-medium transition-all">Home</a>
                     <a id="nav-about" href="#about" class="nav-link relative rounded-xl text-gray-700 hover:bg-gray-200 hover:scale-110 hover:rounded-xl hover:text-md px-6 py-3 text-sm font-medium transition-all">About</a>
                     <a id="nav-learning" href="#learning" class="nav-link relative rounded-xl text-gray-700 hover:bg-gray-200 hover:scale-110 hover:rounded-xl hover:text-md px-6 py-3 text-sm font-medium transition-all">Learning</a>
                     <a id="nav-projects" href="#projects" class="nav-link relative rounded-xl text-gray-700 hover:bg-gray-200 hover:scale-110 hover:rounded-xl hover:text-md px-6 py-3 text-sm font-medium transition-all">Projects</a>
                     <a id="nav-life" href="#life" class="nav-link relative rounded-xl text-gray-700 hover:bg-gray-200 hover:scale-110 hover:rounded-md hover:text-md px-6 py-3 text-sm font-medium transition-all">Life @ ICT</a>
-                    <a id="nav-login" href="web\login.php" class="nav-link relative rounded-xl text-cyan-500 hover:bg-cyan-500 hover:text-white hover:scale-110 hover:rounded-xl hover:text-md px-6 py-3 text-sm font-medium transition-all">Login</a>
+                    <a id="nav-login" href="web/login.php" class="nav-link relative rounded-xl text-cyan-500 hover:bg-cyan-500 hover:text-white hover:scale-110 hover:rounded-xl hover:text-md px-6 py-3 text-sm font-medium transition-all">Login</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-16">
+    <main class="pt-24">
         <!-- Home Section -->
         <section id="home" class="min-h-screen bg-white flex items-center justify-center">
             <div class="bg-blue-100 w-full h-full absolute rounded-br-[150px]"></div>
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 mt-20">
                 <div class="flex items-center justify-center mb-4">
                     <div class="h-px w-48 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
                     <h1 class="text-xl font-bold text-cyan-500 mx-4 font-[Roboto] animate-slide-up">WELCOME TO THE</h1>
@@ -175,89 +195,95 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- Learning Section -->
         <div class="bg-white">
-        <section id="learning" class="min-h-screen bg-blue-100 rounded-e-[150px] flex items-center justify-center py-10">  
-            <div class="mx-auto px-20 flex flex-col md:flex-row">
-                <div class="md:w-1/3 bg-white shadow-lg rounded-2xl p-6 mb-6 md:mb-0">
-                    <h2 class="text-3xl font-bold text-cyan-600 mb-4">Project Based Learning</h2>
-                    <div class="h-1 w-32 bg-cyan-500 mb-8 rounded-full"></div>
-                    <ul class="space-y-4">
-                        <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100 selected" onclick="showDetails('human-centric', this)">
-                            <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
-                                <i class="fas fa-lightbulb"></i>
-                            </div>
-                            <span class="text-gray-700 font-medium">Human Centric Projects</span>
-                        </li>
-                        <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100" onclick="showDetails('interdisciplinary', this)">
-                            <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
-                                <i class="fas fa-project-diagram"></i>
-                            </div>
-                            <span class="text-gray-700 font-medium">Interdisciplinary Projects</span>
-                        </li>
-                        <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100" onclick="showDetails('startup-mindset', this)">
-                            <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
-                                <i class="fas fa-rocket"></i>
-                            </div>
-                            <span class="text-gray-700 font-medium">Encourage to cultivate Startup mindsets</span>
-                        </li>
-                        <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100" onclick="showDetails('problem-solving', this)">
-                            <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
-                                <i class="fas fa-puzzle-piece"></i>
-                            </div>
-                            <span class="text-gray-700 font-medium">Problem solving ability</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="md:w-2/3 md:pl-6">
-                    <div id="learning-details" class="bg-white shadow-lg rounded-tr-3xl rounded-bl-3xl p-6 transition-opacity duration-500 opacity-100">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4" id="details-title">Select an option to learn more</h3>
+            <section id="learning" class="min-h-screen bg-blue-100 rounded-e-[150px] flex items-center justify-center py-10">
+                <div class="mx-auto px-20 flex flex-col md:flex-row">
+                    <div class="md:w-1/3 bg-white shadow-lg rounded-2xl p-6 mb-6 md:mb-0">
+                        <h2 class="text-3xl font-bold text-cyan-600 mb-4">Project Based Learning</h2>
                         <div class="h-1 w-32 bg-cyan-500 mb-8 rounded-full"></div>
-                        <p class="text-gray-600" id="details-description">Click on any learning approach from the left menu to see its details here.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100 selected" onclick="showDetails('human-centric', this)">
+                                <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Human Centric Projects</span>
+                            </li>
+                            <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100" onclick="showDetails('interdisciplinary', this)">
+                                <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Interdisciplinary Projects</span>
+                            </li>
+                            <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100" onclick="showDetails('startup-mindset', this)">
+                                <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Encourage to cultivate Startup mindsets</span>
+                            </li>
+                            <li class="flex items-center p-3 border-2 rounded-2xl hover:rounded-full hover:border-2 hover:border-cyan-500 cursor-pointer transition-all duration-100" onclick="showDetails('problem-solving', this)">
+                                <div class="w-10 h-10 bg-cyan-500 text-white flex items-center justify-center rounded-full mr-4">
+                                    <i class="fas fa-puzzle-piece"></i>
+                                </div>
+                                <span class="text-gray-700 font-medium">Problem solving ability</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:w-2/3 md:pl-6">
+                        <div id="learning-details" class="bg-white shadow-lg rounded-tr-3xl rounded-bl-3xl p-6 transition-opacity duration-500 opacity-100">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4" id="details-title">Select an option to learn more</h3>
+                            <div class="h-1 w-32 bg-cyan-500 mb-8 rounded-full"></div>
+                            <p class="text-gray-600" id="details-description">Click on any learning approach from the left menu to see its details here.</p>
+                        </div>
                     </div>
                 </div>
+            </section>
+        </div>
+
+        <!-- Projects Section -->
+        <section id="projects" class="ml-10 min-h-screen bg-white rounded-s-[150px] flex items-center justify-center py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Projects</h2>
+                <p class="text-gray-600 mb-8">Discover innovative projects developed by our students and faculty.</p>
+                <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+                    <?php foreach ($projects as $index => $project): ?>
+                        <div class="video-item video-card <?php echo $index >= 8 ? 'hidden' : ''; ?>">
+                            <div class="relative" style="padding-top: 56.25%;">
+                                <?php if (!empty($project['video_link']) && strpos($project['video_link'], 'youtube.com/embed') !== false): ?>
+                                    <iframe class="absolute top-0 left-0 w-full h-full rounded-t-lg"
+                                            src="<?php echo htmlspecialchars($project['video_link']); ?>"
+                                            title="<?php echo htmlspecialchars($project['title']); ?>"
+                                            frameborder="0"
+                                            allowfullscreen
+                                            loading="lazy"></iframe>
+                                <?php else: ?>
+                                    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-200 rounded-t-lg">
+                                        <p class="text-gray-500">Video unavailable</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold text-gray-900"><?php echo htmlspecialchars($project['title']); ?></h3>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php if (count($projects) > 8): ?>
+                    <div class="text-center mt-8">
+                        <button id="toggle-videos" class="bg-cyan-500 text-white px-6 py-2 rounded-lg hover:bg-cyan-600 transition">
+                            Show more...
+                        </button>
+                    </div>
+                <?php endif; ?>
             </div>
         </section>
-
-        </div>
-        <!-- Projects Section -->
-<section id="projects" class="ml-10 min-h-screen bg-white rounded-s-[150px] flex items-center justify-center py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Projects</h2>
-        <p class="text-gray-600 mb-8">Discover innovative projects developed by our students and faculty.</p>
-        
-        <div id="video-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <?php foreach ($projects as $index => $project): ?>
-                <div class="video-item <?php echo $index >= 6 ? 'hidden' : ''; ?>">
-                    <div class="relative" style="padding-top: 56.25%;">
-                        <iframe class="absolute top-0 left-0 w-full h-full" 
-                                src="<?php echo htmlspecialchars($project['video_link']); ?>" 
-                                frameborder="0" allowfullscreen></iframe>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mt-4">
-                        <?php echo htmlspecialchars($project['title']); ?>
-                    </h3>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        
-        <?php if (count($projects) > 6): ?>
-            <div class="text-center mt-8">
-                <button id="show-more" 
-                        class="bg-cyan-500 text-white px-6 py-2 rounded-lg hover:bg-cyan-600 transition">
-                    Show more...
-                </button>
-            </div>
-        <?php endif; ?>
-    </div>
-</section>
 
         <!-- Life @ ICT Section -->
         <div class="bg-white">
-        <section id="life" class="min-h-screen bg-blue-100 rounded-tr-[150px] flex items-center">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Life @ ICT</h2>
-                <p class="text-gray-600">Experience the vibrant community and exciting opportunities at ICT.</p>
-            </div>
-        </section>
+            <section id="life" class="min-h-screen bg-blue-100 rounded-tr-[150px] flex items-center">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Life @ ICT</h2>
+                    <p class="text-gray-600">Experience the vibrant community and exciting opportunities at ICT.</p>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -270,7 +296,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <!-- Scripts -->
     <script>
-        // Function to animate the count
         function animateCount(element, start, end, duration) {
             let startTime = null;
             const step = (timestamp) => {
@@ -287,16 +312,13 @@ document.addEventListener('DOMContentLoaded', function() {
             requestAnimationFrame(step);
         }
 
-        // Get the total students from PHP
         const totalStudents = <?php echo json_encode($total_students); ?>;
 
-        // Animate the count when the page loads
         window.onload = function() {
             const studentCountElement = document.getElementById('student-count');
             animateCount(studentCountElement, 1, totalStudents, 2000);
         };
 
-        // Learning Section: Show details
         function showDetails(option, element) {
             const menuItems = document.querySelectorAll('#learning .md\\:w-1\\/3 ul li');
             menuItems.forEach(item => item.classList.remove('selected'));
@@ -338,13 +360,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
 
-        // Select the first option by default in Learning Section
         document.addEventListener('DOMContentLoaded', function() {
             const firstOption = document.querySelector('#learning .md\\:w-1\\/3 ul li');
             showDetails('human-centric', firstOption);
         });
 
-        // Navbar: Update active link on scroll and click
         function updateActiveNavLink() {
             const sections = document.querySelectorAll('section');
             const navLinks = document.querySelectorAll('.nav-link');

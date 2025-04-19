@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../controllers/ParentController.php';
 
-function ParentRoutes($method, $subpath) {
+function    ParentRoutes($method, $subpath) {
     $input = json_decode(file_get_contents('php://input'), true);
     switch ($subpath) {
         case 'login': // Handle "Parent/Login"

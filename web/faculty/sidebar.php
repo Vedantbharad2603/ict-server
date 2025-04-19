@@ -108,6 +108,46 @@ $color = "cyan";
                     </li>
                     <?php endif; ?>
 
+                    <?php if ($userdata['designation'] === 'hod'): ?>
+                    <li>
+                        <a href="timetable.php">
+                            <div class="w-full h-10 flex items-center px-5 text-grey-500 transition bg-transparent hover:bg-<?php echo $color; ?>-600 hover:text-white active:bg-<?php echo $color; ?>-900 <?php echo $radious; ?>">
+                                Manage Timetable
+                            </div>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if ($userdata['designation'] === 'hod'): ?>
+                    <li>
+                        <a href="student_class_allocation.php">
+                            <div class="w-full h-10 flex items-center px-5 text-grey-500 transition bg-transparent hover:bg-<?php echo $color; ?>-600 hover:text-white active:bg-<?php echo $color; ?>-900 <?php echo $radious; ?>">
+                                Student Class Allocation
+                            </div>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if ($userdata['designation'] === 'hod'): ?>
+                    <li>
+                        <a href="subject_allocation.php">
+                            <div class="w-full h-10 flex items-center px-5 text-grey-500 transition bg-transparent hover:bg-<?php echo $color; ?>-600 hover:text-white active:bg-<?php echo $color; ?>-900 <?php echo $radious; ?>">
+                                Manage Subject Allocation
+                            </div>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if ($userdata['designation'] === 'hod'): ?>
+                    <li>
+                        <a href="landing_projects.php">
+                            <div class="w-full h-10 flex items-center px-5 text-grey-500 transition bg-transparent hover:bg-<?php echo $color; ?>-600 hover:text-white active:bg-<?php echo $color; ?>-900 <?php echo $radious; ?>">
+                                Landing Page Projects
+                            </div>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+
                     <!-- Placement Dropdown -->
                     <?php if ($userdata['designation'] === 'hod'): ?>
                     <li class="relative">
@@ -150,7 +190,7 @@ $color = "cyan";
                             // Rotate arrow up
                             arrow.style.transform = "rotate(180deg)";
                             // Highlight box with red background and white text
-                            box.classList.add('bg-<?php echo $color; ?>-600', 'text-white');
+                            box.classList.add('bg-<?php echo $color; ?>-600','text-white');
                         } else {
                             dropdown.classList.add('opacity-0', 'translate-y-5');
                             dropdown.classList.remove('opacity-100', 'translate-y-0');

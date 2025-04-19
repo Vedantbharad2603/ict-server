@@ -127,7 +127,8 @@ if ($faculty_count_result && $row = $faculty_count_result->fetch_assoc()) {
             </div>
 
              <!-- Total subjects Card -->
-             <div class="bg-white border-2 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group">
+             <div class="bg-white border-2 rounded-xl p-6 text-center transform transition-all hover:scale-105 cursor-pointer group"
+             onclick="window.location.href='subjects.php';">
                 <div class="flex flex-col items-center justify-center space-y-2">
                     <div class="w-16 h-16 flex items-center justify-center rounded-full border-2 border-green-500">
                         <i class="fa-solid fa-book text-2xl text-green-500"></i>

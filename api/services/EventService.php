@@ -36,7 +36,7 @@ function getAllEventsService() {
     global $conn;
 
     try {
-        $result = $conn->query("SELECT * FROM events_info ORDER BY datetime DESC");
+        $result = $conn->query("SELECT * FROM events_info ORDER BY datetime");
         $events = [];
 
         while ($row = $result->fetch_assoc()) {

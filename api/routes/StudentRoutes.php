@@ -21,6 +21,14 @@ function StudentRoutes($method, $subpath) {
                 echo json_encode(['message' => 'Method not allowed']);
             }
             break;
+        case 'by-enrolment': // Handle "Student/by-enrolment"
+            if ($method === 'POST') {
+                StudentDetailsController($input);
+            } else {
+                http_response_code(405); // Method Not Allowed
+                echo json_encode(['message' => 'Method not allowed']);
+            }
+            break;
         default:
             http_response_code(404); // Not Found
             echo json_encode(['message' => 'Invalid Student API endpoint']);

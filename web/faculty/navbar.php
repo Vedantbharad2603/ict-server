@@ -54,12 +54,12 @@ if (!isset($_SESSION['image_url'])) {
         <!-- Dropdown Menu -->
         <div id="dropdown-menu" class="absolute right-0 w-full shadow bg-white border rounded-b-xl opacity-0 transform translate-y-2 transition-all duration-300 hidden">
             <ul class="py-2">
-                <li class="group/profile flex items-center cursor-pointer hover:bg-gray-50">
+                <!-- <li class="group/profile flex items-center cursor-pointer hover:bg-gray-50">
                     <div class="h-8 w-0 bg-cyan-500 group-hover/profile:w-1 transition-all duration-100"></div>
                     <a href="profile.php" class="block px-4 py-2 text-gray-700 group-hover/profile:text-cyan-500 transition-all">
                         Profile
                     </a>
-                </li>
+                </li> -->
                 <li class="group/profile flex items-center cursor-pointer hover:bg-gray-50">
                     <div class="h-8 w-0 bg-red-500 group-hover/profile:w-1 transition-all duration-100"></div>
                     <a href="../logout.php" class="block px-4 py-2 text-gray-700 group-hover/profile:text-red-500 group-hover/profile:font-bold transition-all">

@@ -1,225 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 include('../../api/db/db_connection.php');
-
-// Handle AJAX requests
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    header('Content-Type: application/json');
-
-    $action = $_POST['action'];
-
-    // Fetch elective subjects for a semester
-    if ($action === 'fetch_subjects') {
-        $sem_id = isset($_POST['sem_info_id']) ? intval($_POST['sem_info_id']) : 0;
-        if ($sem_id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid semester ID']);
-            exit;
-        }
-
-        $query = "SELECT id, subject_name 
-                  FROM subject_info 
-                  WHERE sem_info_id = ? AND type = 'elective' 
-                  ORDER BY subject_name";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'i', $sem_id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $subjects = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $subjects[] = $row;
-        }
-
-        echo json_encode(['status' => 'success', 'subjects' => $subjects]);
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-        exit;
-    }
-
-    // Fetch students allocated to an elective subject
-    if ($action === 'fetch_students') {
-        $sem_id = isset($_POST['sem_info_id']) ? intval($_POST['sem_info_id']) : 0;
-        $subject_id = isset($_POST['subject_info_id']) ? intval($_POST['subject_info_id']) : 0;
-        if ($sem_id <= 0 || $subject_id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid semester or subject ID']);
-            exit;
-        }
-
-        $query = "SELECT si.id, si.first_name, si.last_name, si.gr_no, si.enrollment_no, ea.class_info_id, ci.classname, ci.batch 
-                  FROM student_info si 
-                  INNER JOIN elective_allocation ea ON si.id = ea.student_info_id 
-                  LEFT JOIN class_info ci ON ea.class_info_id = ci.id 
-                  WHERE si.sem_info_id = ? AND ea.subject_info_id = ? 
-                  ORDER BY si.enrollment_no";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'ii', $sem_id, $subject_id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $students = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $students[] = $row;
-        }
-
-        echo json_encode(['status' => 'success', 'students' => $students]);
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-        exit;
-    }
-
-    // Fetch classes for an elective subject
-    if ($action === 'fetch_classes') {
-        $subject_id = isset($_POST['subject_info_id']) ? intval($_POST['subject_info_id']) : 0;
-        if ($subject_id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid subject ID']);
-            exit;
-        }
-
-        $query = "SELECT id, classname, batch 
-                  FROM class_info 
-                  WHERE elective_subject_id = ? 
-                  ORDER BY classname, batch";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'i', $subject_id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $classes = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $classes[] = $row;
-        }
-
-        echo json_encode(['status' => 'success', 'classes' => $classes]);
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-        exit;
-    }
-
-    // Fetch available students (not allocated to the subject)
-    if ($action === 'fetch_available_students') {
-        $sem_id = isset($_POST['sem_info_id']) ? intval($_POST['sem_info_id']) : 0;
-        $subject_id = isset($_POST['subject_info_id']) ? intval($_POST['subject_info_id']) : 0;
-        if ($sem_id <= 0 || $subject_id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid semester or subject ID']);
-            exit;
-        }
-
-        $query = "SELECT si.id, si.first_name, si.last_name 
-                  FROM student_info si 
-                  WHERE si.sem_info_id = ? 
-                  AND si.id NOT IN (
-                      SELECT student_info_id 
-                      FROM elective_allocation 
-                      WHERE subject_info_id = ?
-                  ) 
-                  ORDER BY si.first_name, si.last_name";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'ii', $sem_id, $subject_id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $students = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $students[] = $row;
-        }
-
-        echo json_encode(['status' => 'success', 'students' => $students]);
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-        exit;
-    }
-
-    // Add a student to an elective
-    if ($action === 'add_student') {
-        $student_id = isset($_POST['student_id']) ? intval($_POST['student_id']) : 0;
-        $subject_id = isset($_POST['subject_info_id']) ? intval($_POST['subject_info_id']) : 0;
-        $class_id = isset($_POST['class_id']) ? intval($_POST['class_id']) : null;
-
-        if ($student_id <= 0 || $subject_id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid student or subject ID']);
-            exit;
-        }
-
-        $query = "INSERT INTO elective_allocation (student_info_id, subject_info_id, class_info_id) 
-                  VALUES (?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'iii', $student_id, $subject_id, $class_id);
-        $success = mysqli_stmt_execute($stmt);
-
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-
-        if ($success) {
-            echo json_encode(['status' => 'success', 'message' => 'Student added successfully']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to add student']);
-        }
-        exit;
-    }
-
-    // Delete a student from an elective
-    if ($action === 'delete_student') {
-        $student_id = isset($_POST['student_id']) ? intval($_POST['student_id']) : 0;
-        $subject_id = isset($_POST['subject_info_id']) ? intval($_POST['subject_info_id']) : 0;
-        if ($student_id <= 0 || $subject_id <= 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid student or subject ID']);
-            exit;
-        }
-
-        $query = "DELETE FROM elective_allocation 
-                  WHERE student_info_id = ? AND subject_info_id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'ii', $student_id, $subject_id);
-        $success = mysqli_stmt_execute($stmt);
-
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-
-        if ($success) {
-            echo json_encode(['status' => 'success', 'message' => 'Student removed successfully']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to remove student or student not found']);
-        }
-        exit;
-    }
-
-    // Save class allocations
-    if ($action === 'save_allocations') {
-        $allocations = isset($_POST['allocations']) ? json_decode($_POST['allocations'], true) : [];
-        if (empty($allocations)) {
-            echo json_encode(['status' => 'error', 'message' => 'No allocations provided']);
-            exit;
-        }
-
-        $success_count = 0;
-        $query = "UPDATE elective_allocation SET class_info_id = ? 
-                  WHERE student_info_id = ? AND subject_info_id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-
-        foreach ($allocations as $alloc) {
-            $student_id = intval($alloc['student_id']);
-            $subject_id = intval($alloc['subject_info_id']);
-            $class_id = !empty($alloc['class_id']) ? intval($alloc['class_id']) : null;
-
-            mysqli_stmt_bind_param($stmt, 'iii', $class_id, $student_id, $subject_id);
-            if (mysqli_stmt_execute($stmt)) {
-                $success_count++;
-            }
-        }
-
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-
-        if ($success_count === count($allocations)) {
-            echo json_encode(['status' => 'success', 'message' => 'All allocations saved successfully']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Some allocations failed to save']);
-        }
-        exit;
-    }
-
-    echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
-    exit;
-}
 ?>
 
 <!DOCTYPE html>
@@ -228,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Elective Allocation</title>
+    <title>Timetable Manage</title>
     <link rel="icon" type="image/png" href="../assets/images/favicon.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -237,30 +17,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <style>
-        #student-table {
-            border-collapse: collapse;
+        .tab-active {
+            background-color: #3b82f6;
+            color: white;
         }
-        #student-table th,
-        #student-table td {
-            text-align: center;
-            border: 1px solid #d1d5db;
-            /* gray-300 */
+
+        .tile {
+            background-color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            position: relative;
         }
-        #student-table th {
-            background-color: #374151;
-            /* gray-700 */
-            color: #ffffff;
-            /* white */
+
+        .saved-tag {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            color: white;
         }
-        #student-table tbody tr:hover {
-            background-color: #f9fafb;
-            /* gray-50 */
+
+        .saved {
+            background-color: #22c55e;
         }
-        select.class-dropdown {
-            width: 150px;
-            padding: 4px;
-            border-radius: 4px;
-            border: 1px solid #d1d5db;
+
+        .not-saved {
+            background-color: #eab308;
         }
     </style>
 </head>
@@ -269,13 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <?php include('./sidebar.php'); ?>
     <div class="main-content pl-64 flex-1 ml-1/6 overflow-y-auto">
         <?php
-        $page_title = "Student Elective Allocation";
+        $page_title = "Timetable Manage";
         include('./navbar.php');
         ?>
         <div class="container mx-auto p-6">
-            <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-                <div class="flex flex-col md:flex-row md:space-x-4">
-                    <div class="w-full md:w-1/3 mb-4 md:mb-0">
+            <form id="timetableForm" class="bg-white p-6 rounded-xl shadow-md">
+                <!-- Semester & Program, Class and Batch in a Row -->
+                <div class="flex flex-wrap -mx-3 mb-4">
+                    <div class="w-full md:w-1/2 px-3 mb-4">
                         <label for="semester" class="block text-gray-700 font-bold mb-2">Semester & Program</label>
                         <select id="semester" name="semester" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
                             <option value="" disabled selected>Select Semester & Program</option>
@@ -285,446 +71,798 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             while ($row = mysqli_fetch_assoc($sem_result)) {
                                 echo "<option value='{$row['id']}'>SEM {$row['sem']} - " . strtoupper($row['edu_type']) . "</option>";
                             }
-                            mysqli_close($conn);
                             ?>
                         </select>
                     </div>
-                    <div class="w-full md:w-1/3">
-                        <label for="elective-subject" class="block text-gray-700 font-bold mb-2">Elective Subject</label>
-                        <select id="elective-subject" name="elective-subject" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" disabled>
-                            <option value="" disabled selected>Select Elective Subject</option>
+                    <div class="w-full md:w-1/2 px-3 mb-4">
+                        <label for="class_batch" class="block text-gray-700 font-bold mb-2">Class & Batch</label>
+                        <select id="class_batch" name="class_batch" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" disabled>
+                            <option value="" disabled selected>Select Class & Batch</option>
                         </select>
                     </div>
                 </div>
-            </div>
-            <div class="p-6 bg-white rounded-xl shadow-md">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex space-x-4">
-                        <button id="save-btn" class="bg-cyan-500 shadow-md hover:shadow-xl px-6 text-white p-2 rounded-full hover:bg-cyan-600 transition-all" disabled>Save Changes</button>
-                        <button id="add-student-btn" class="bg-green-500 shadow-md hover:shadow-xl px-6 text-white p-2 rounded-full hover:bg-green-600 transition-all" disabled>Add Student</button>
+
+                <!-- Tab Bar for Days (Hidden by default) -->
+                <div id="day_tabs" class="mb-4 hidden">
+                    <div class="flex space-x-2 border-b">
+                        <?php
+                        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+                        foreach ($days as $index => $day) {
+                            $active = $index === 0 ? 'tab-active' : '';
+                            echo "<button type='button' class='tab-button px-4 py-2 font-bold text-sm capitalize rounded-full $active hover:bg-cyan-600 hover:text-white transition-all' data-day='$day'>$day</button>";
+                        }
+                        ?>
                     </div>
-                    <input type="text" id="search-student" class="w-64 p-2 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Search student name...">
                 </div>
-                <table id="student-table" class="min-w-full bg-white shadow-lg rounded-md border border-gray-300">
-                    <thead>
-                        <tr class="bg-gray-700 text-white">
-                            <th class="border px-4 py-2 rounded-tl-md">No</th>
-                            <th class="border px-4 py-2">Student Name</th>
-                            <th class="border px-4 py-2">Enrollment No</th>
-                            <th class="border px-4 py-2">GR No</th>
-                            <th class="border px-4 py-2">Elective Class</th>
-                            <th class="border px-4 py-2 rounded-tr-md">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+
+                <!-- Timetable Slots -->
+                <div id="timetable_slots" class="mb-4">
+                    <?php foreach ($days as $day) { ?>
+                        <div id="slots_<?php echo $day; ?>" class="day-slots hidden">
+                            <h3 class="text-lg font-semibold capitalize mb-2"><?php echo $day; ?> Slots</h3>
+                            <div id="tiles_<?php echo $day; ?>" class="tiles"></div>
+                            <button type="button" class="add-slot bg-cyan-500 text-white px-3 p-1 rounded-full hover:scale-110 hover:bg-cyan-600 font-bold transition-all mt-3 mb-2" data-day="<?php echo $day; ?>" disabled>+ Add Slot</button>
+                        </div>
+                    <?php } ?>
+                </div>
+
+                <!-- Slot Form (Hidden, shown via JS) -->
+                <div id="slot_form" class="hidden bg-gray-100 p-4 rounded-xl mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Add/Edit Slot</h3>
+                    <input type="hidden" id="slot_day" name="slot_day">
+                    <input type="hidden" id="edit_index" name="edit_index">
+                    <input type="hidden" id="slot_id" name="slot_id">
+                    <div class="flex flex-wrap -mx-3">
+                        <!-- Start and End Time -->
+                        <div class="w-full md:w-1/2 px-3 mb-4">
+                            <label for="start_time" class="block text-gray-700 font-bold mb-2">Start Time</label>
+                            <input type="time" id="start_time" name="start_time" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                        </div>
+                        <div class="w-full md:w-1/2 px-3 mb-4">
+                            <label for="end_time" class="block text-gray-700 font-bold mb-2">End Time</label>
+                            <input type="time" id="end_time" name="end_time" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                        </div>
+                        <!-- Subject -->
+                        <div class="w-full md:w-1/2 px-3 mb-4">
+                            <label for="subject" class="block text-gray-700 font-bold mb-2">Subject</label>
+                            <select id="subject" name="subject" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" disabled>
+                                <option value="" disabled selected>Select Subject</option>
+                            </select>
+                        </div>
+                        <!-- Faculty -->
+                        <div class="w-full md:w-1/2 px-3 mb-4">
+                            <label for="faculty" class="block text-gray-700 font-bold mb-2">Faculty</label>
+                            <select id="faculty" name="faculty" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" disabled>
+                                <option value="" disabled selected>Select Faculty</option>
+                            </select>
+                        </div>
+                        <!-- Class Location -->
+                        <div class="w-full md:w-1/2 px-3 mb-4">
+                            <label for="class_location" class="block text-gray-700 font-bold mb-2">Class Location</label>
+                            <select id="class_location" name="class_location" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                <option value="" disabled selected>Select Class Location</option>
+                                <?php
+                                $loc_query = "SELECT id, classname FROM class_location_info";
+                                $loc_result = mysqli_query($conn, $loc_query);
+                                while ($row_loc = mysqli_fetch_assoc($loc_result)) {
+                                    echo "<option value='{$row_loc['id']}'>{$row_loc['classname']}</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <!-- Lecture Type -->
+                        <div class="w-full md:w-1/2 px-3 mb-4">
+                            <label for="lec_type" class="block text-gray-700 font-bold mb-2">Lecture Type</label>
+                            <select id="lec_type" name="lec_type" class="w-full p-3 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                <option value="" disabled selected>Select Lecture Type</option>
+                                <option value="T">Theory</option>
+                                <option value="L">Lab</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end space-x-2">
+                        <button type="button" id="cancel_slot" class="bg-gray-700 text-white px-5 p-3 rounded-full hover:px-7 font-bold transition-all">Cancel</button>
+                        <button type="button" id="save_slot" class="bg-cyan-600 text-white px-5 p-3 rounded-full hover:px-7 font-bold hover:bg-cyan-700 transition-all">Save Slot</button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="button" id="submit_timetable" class="bg-cyan-600 text-white px-5 p-3 rounded-full hover:px-7 font-bold hover:bg-cyan-700 transition-all" disabled>Submit Timetable</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         $(document).ready(function() {
+            let slots = {
+                monday: [],
+                tuesday: [],
+                wednesday: [],
+                thursday: [],
+                friday: []
+            };
+            let savedSlots = {
+                monday: [],
+                tuesday: [],
+                wednesday: [],
+                thursday: [],
+                friday: []
+            };
             let selectedSemId = '';
-            let selectedSubjectId = '';
-            let classes = [];
-            let changedAllocations = {};
+            let selectedClassId = '';
 
-            const table = $('#student-table').DataTable({
-                paging: false,
-                info: false,
-                searching: false,
-                ordering: false,
-                language: {
-                    emptyTable: 'Please select a semester and elective subject to view students'
-                },
-                columns: [
-                    { data: 'no' },
-                    { data: 'student_name' },
-                    { data: 'enrollment_no' },
-                    { data: 'gr_no' },
-                    { data: 'class' },
-                    { 
-                        data: null,
-                        render: function(data, type, row) {
-                            return `<button class="delete-btn text-red-500 transition-all" data-student-id="${row.student_id}" data-subject-id="${selectedSubjectId}" title="Remove Student">
-                                        Delete
-                                    </button>`;
-                        }
-                    }
-                ]
+            // Tab Switching
+            $('.tab-button').click(function() {
+                $('.tab-button').removeClass('tab-active');
+                $(this).addClass('tab-active');
+                $('.day-slots').addClass('hidden');
+                $('#slots_' + $(this).data('day')).removeClass('hidden');
             });
+            $('#slots_monday').removeClass('hidden'); // Show Monday by default when tabs are visible
 
-            // Debug: Log column headers
-            console.log('Column headers:', table.columns().header().toArray().map(h => $(h).text()));
-
-            // Real-time search for student name
-            function bindSearch() {
-                $('#search-student').off('input').on('input', function() {
-                    const searchValue = $(this).val();
-                    console.log('Search value:', searchValue);
-                    table.column(1).search(searchValue, false, true).draw();
-                    console.log('Filtered rows:', table.rows({ search: 'applied' }).data().toArray());
-                });
-            }
-            bindSearch();
-
-            // Semester change: Load elective subjects
+            // Load Classes and Batches based on Semester
             $('#semester').change(function() {
                 selectedSemId = $(this).val();
-                selectedSubjectId = '';
-                $('#elective-subject').prop('disabled', true).val('');
-                $('#add-student-btn').prop('disabled', true);
-                table.clear().draw();
-                $('#save-btn').prop('disabled', true);
-                changedAllocations = {};
-                $('#search-student').val('');
-                table.column(1).search('').draw();
-
+                $('#class_batch').prop('disabled', false).html('<option value="" disabled selected>Select Class & Batch</option>');
+                $('#day_tabs').addClass('hidden');
+                slots = {
+                    monday: [],
+                    tuesday: [],
+                    wednesday: [],
+                    thursday: [],
+                    friday: []
+                };
+                savedSlots = {
+                    monday: [],
+                    tuesday: [],
+                    wednesday: [],
+                    thursday: [],
+                    friday: []
+                };
+                $('.tiles').empty();
+                $('.add-slot').prop('disabled', true);
+                $('#submit_timetable').prop('disabled', true);
                 if (selectedSemId) {
                     $.ajax({
-                        url: 'student_elective_allocation.php',
+                        url: 'fetch_classes.php',
                         method: 'POST',
-                        data: { action: 'fetch_subjects', sem_info_id: selectedSemId },
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                $('#elective-subject').empty().append('<option value="" disabled selected>Select Elective Subject</option>');
-                                if (response.subjects.length > 0) {
-                                    response.subjects.forEach(subject => {
-                                        $('#elective-subject').append(`<option value="${subject.id}">${subject.subject_name}</option>`);
-                                    });
-                                    $('#elective-subject').prop('disabled', false);
+                        data: {
+                            sem_id: selectedSemId
+                        },
+                        success: function(data) {
+                            console.log('fetch_classes raw response:', data);
+                            let classes = data;
+                            if (!Array.isArray(classes)) {
+                                console.error('fetch_classes error: Expected an array, got:', classes);
+                                if (classes && typeof classes === 'object' && classes.error) {
+                                    Swal.fire('Error', classes.error, 'error');
                                 } else {
-                                    Swal.fire('Info', 'No elective subjects found for this semester.', 'info');
+                                    Swal.fire('Error', 'Invalid response format from server when loading classes.', 'error');
                                 }
-                            } else {
-                                Swal.fire('Error', response.message || 'Failed to load elective subjects.', 'error');
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('fetch_subjects AJAX error:', status, error, 'Response:', xhr.responseText);
-                            Swal.fire('Error', 'Failed to load elective subjects. Check the console for details.', 'error');
-                        }
-                    });
-                }
-            });
-
-            // Elective subject change: Load students and classes
-            $('#elective-subject').change(function() {
-                selectedSubjectId = $(this).val();
-                table.clear().draw();
-                $('#save-btn').prop('disabled', true);
-                $('#add-student-btn').prop('disabled', !selectedSubjectId);
-                changedAllocations = {};
-                $('#search-student').val('');
-                table.column(1).search('').draw();
-
-                if (selectedSubjectId) {
-                    // Fetch classes
-                    $.ajax({
-                        url: 'student_elective_allocation.php',
-                        method: 'POST',
-                        data: { action: 'fetch_classes', subject_info_id: selectedSubjectId },
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                classes = response.classes;
-                                // Fetch students
-                                $.ajax({
-                                    url: 'student_elective_allocation.php',
-                                    method: 'POST',
-                                    data: { 
-                                        action: 'fetch_students', 
-                                        sem_info_id: selectedSemId, 
-                                        subject_info_id: selectedSubjectId 
-                                    },
-                                    dataType: 'json',
-                                    success: function(response) {
-                                        if (response.status === 'success') {
-                                            table.clear();
-                                            if (response.students.length === 0) {
-                                                table.draw();
-                                                return;
-                                            }
-
-                                            const rows = response.students.map((student, index) => {
-                                                let classOptions = '<option value="">Select Class</option>';
-                                                classes.forEach(cls => {
-                                                    const selected = cls.id == student.class_info_id ? 'selected' : '';
-                                                    classOptions += `<option value="${cls.id}" ${selected}>${cls.classname} - ${cls.batch.toUpperCase()}</option>`;
-                                                });
-
-                                                return {
-                                                    no: index + 1,
-                                                    student_id: student.id,
-                                                    student_name: `${student.first_name} ${student.last_name}`,
-                                                    enrollment_no: student.enrollment_no,
-                                                    gr_no: student.gr_no,
-                                                    class: `<select class="class-dropdown" data-student-id="${student.id}" data-subject-id="${selectedSubjectId}" data-original-class="${student.class_info_id || ''}">
-                                                                ${classOptions}
-                                                            </select>`
-                                                };
-                                            });
-                                            table.rows.add(rows).draw();
-                                            console.log('Table data:', table.rows().data().toArray());
-
-                                            bindSearch();
-
-                                            // Track changes in class dropdowns
-                                            $('.class-dropdown').on('change', function() {
-                                                const studentId = $(this).data('student-id');
-                                                const subjectId = $(this).data('subject-id');
-                                                const newClassId = $(this).val();
-                                                const originalClassId = $(this).data('original-class');
-
-                                                if (newClassId !== originalClassId) {
-                                                    changedAllocations[`${studentId}_${subjectId}`] = {
-                                                        student_id: studentId,
-                                                        subject_info_id: subjectId,
-                                                        class_id: newClassId || null
-                                                    };
-                                                } else {
-                                                    delete changedAllocations[`${studentId}_${subjectId}`];
-                                                }
-
-                                                $('#save-btn').prop('disabled', Object.keys(changedAllocations).length === 0);
-                                            });
-
-                                            // Handle delete button click
-                                            $('.delete-btn').on('click', function() {
-                                                const studentId = $(this).data('student-id');
-                                                const subjectId = $(this).data('subject-id');
-                                                const studentName = table.row($(this).closest('tr')).data().student_name;
-
-                                                Swal.fire({
-                                                    title: 'Are you sure?',
-                                                    text: `Do you want to remove ${studentName} from this elective?`,
-                                                    icon: 'warning',
-                                                    showCancelButton: true,
-                                                    confirmButtonText: 'Yes, remove',
-                                                    cancelButtonText: 'No',
-                                                    confirmButtonColor: '#06b6d4',
-                                                    cancelButtonColor: '#6b7280'
-                                                }).then((result) => {
-                                                    if (result.isConfirmed) {
-                                                        $.ajax({
-                                                            url: 'student_elective_allocation.php',
-                                                            method: 'POST',
-                                                            data: {
-                                                                action: 'delete_student',
-                                                                student_id: studentId,
-                                                                subject_info_id: subjectId
-                                                            },
-                                                            dataType: 'json',
-                                                            success: function(response) {
-                                                                if (response.status === 'success') {
-                                                                    Swal.fire('Success', response.message, 'success').then(() => {
-                                                                        $('#elective-subject').trigger('change');
-                                                                    });
-                                                                } else {
-                                                                    Swal.fire('Error', response.message || 'Failed to remove student.', 'error');
-                                                                }
-                                                            },
-                                                            error: function(xhr, status, error) {
-                                                                console.error('delete_student AJAX error:', status, error, 'Response:', xhr.responseText);
-                                                                Swal.fire('Error', 'Failed to remove student. Check the console for details.', 'error');
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                            });
-                                        } else {
-                                            Swal.fire('Error', response.message || 'Failed to load students.', 'error');
-                                        }
-                                    },
-                                    error: function(xhr, status, error) {
-                                        console.error('fetch_students AJAX error:', status, error, 'Response:', xhr.responseText);
-                                        Swal.fire('Error', 'Failed to load students. Check the console for details.', 'error');
-                                    }
-                                });
-                            } else {
-                                Swal.fire('Error', response.message || 'Failed to load classes.', 'error');
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('fetch_classes AJAX error:', status, error, 'Response:', xhr.responseText);
-                            Swal.fire('Error', 'Failed to load classes. Check the console for details.', 'error');
-                        }
-                    });
-                }
-            });
-
-            // Add student pop-up
-            $('#add-student-btn').click(function() {
-                $.ajax({
-                    url: 'student_elective_allocation.php',
-                    method: 'POST',
-                    data: { 
-                        action: 'fetch_available_students', 
-                        sem_info_id: selectedSemId, 
-                        subject_info_id: selectedSubjectId 
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            if (response.students.length === 0) {
-                                Swal.fire('Info', 'No available students to add for this elective.', 'info');
+                                $('#class_batch').prop('disabled', true);
                                 return;
                             }
 
-                            let studentOptions = '<option value="" disabled selected>Select Student</option>';
-                            response.students.forEach(student => {
-                                studentOptions += `<option value="${student.id}">${student.first_name} ${student.last_name}</option>`;
+                            console.log('Classes:', classes);
+
+                            if (classes.length === 0) {
+                                Swal.fire('Warning', 'No classes found for this semester', 'warning');
+                                $('#class_batch').prop('disabled', true);
+                                return;
+                            }
+
+                            classes.forEach(cls => {
+                                let electiveSubId = cls.elective_subject_id !== null && cls.elective_subject_id !== '' ? cls.elective_subject_id : '';
+                                console.log('Adding class:', cls.classname, 'electiveSubId:', electiveSubId);
+                                $('#class_batch').append(
+                                    `<option value="${cls.id}" data-classname="${cls.classname}" data-batch="${cls.batch}" data-group="${cls.group}" data-elective-sub-id="${electiveSubId}">
+                                        ${cls.classname} - ${(cls.batch || 'No Batch').toUpperCase()}${cls.group === 'elective' ? ' (Elective)' : ''}
+                                    </option>`
+                                );
                             });
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('fetch_classes AJAX error:', status, error, 'Response:', xhr.responseText);
+                            Swal.fire('Error', 'Failed to load classes. Please check your network or try again.', 'error');
+                            $('#class_batch').prop('disabled', true);
+                        }
+                    });
+                } else {
+                    $('#class_batch').prop('disabled', true);
+                }
+            });
 
-                            // Fetch classes for the subject
-                            $.ajax({
-                                url: 'student_elective_allocation.php',
-                                method: 'POST',
-                                data: { action: 'fetch_classes', subject_info_id: selectedSubjectId },
-                                dataType: 'json',
-                                success: function(classResponse) {
-                                    if (classResponse.status === 'success') {
-                                        let popupHtml = `
-                                            <div class="text-left">
-                                                <label for="student-select" class="block text-gray-700 font-bold mb-2">Student</label>
-                                                <select id="student-select" class="w-full p-3 border-2 rounded-xl mb-4">
-                                                    ${studentOptions}
-                                                </select>
-                                        `;
-                                        let hasClasses = classResponse.classes.length > 0;
-                                        let classOptions = '';
+            // Show Day Tabs and Load Timetable when Class is Selected
+            $('#class_batch').change(function() {
+                selectedClassId = $(this).val();
+                $('#day_tabs').removeClass('hidden');
+                $('.add-slot').prop('disabled', !selectedClassId);
+                $('#submit_timetable').prop('disabled', !selectedClassId);
+                $('#slot_form').addClass('hidden'); // Hide slot form on class change
+                if (selectedSemId && selectedClassId) {
+                    loadTimetable(selectedSemId, selectedClassId);
+                }
+            });
 
-                                        if (hasClasses) {
-                                            classOptions = '<option value="" disabled selected>Select Class</option>';
-                                            classResponse.classes.forEach(cls => {
-                                                classOptions += `<option value="${cls.id}">${cls.classname} - ${cls.batch.toUpperCase()}</option>`;
-                                            });
-                                            popupHtml += `
-                                                <label for="class-select" class="block text-gray-700 font-bold mb-2">Class</label>
-                                                <select id="class-select" class="w-full p-3 border-2 rounded-xl">
-                                                    ${classOptions}
-                                                </select>
-                                            `;
-                                        }
-                                        popupHtml += `</div>`;
+            // Function to configure Lecture Type dropdown based on lec_type
+            function configureLectureType(lecType, isEditing = false, preSelectedLecType = null) {
+                const $lecTypeDropdown = $('#lec_type');
+                $lecTypeDropdown.html(`
+                    <option value="" disabled selected>Select Lecture Type</option>
+                    <option value="T">Theory</option>
+                    <option value="L">Lab</option>
+                `);
 
-                                        Swal.fire({
-                                            title: 'Add Student to Elective',
-                                            html: popupHtml,
-                                            showCancelButton: true,
-                                            confirmButtonText: 'Add',
-                                            cancelButtonText: 'Cancel',
-                                            confirmButtonColor: '#06b6d4',
-                                            cancelButtonColor: '#6b7280',
-                                            preConfirm: () => {
-                                                const studentId = $('#student-select').val();
-                                                const classId = hasClasses ? $('#class-select').val() : null;
-                                                if (!studentId) {
-                                                    Swal.showValidationMessage('Please select a student.');
-                                                    return false;
-                                                }
-                                                if (hasClasses && !classId) {
-                                                    Swal.showValidationMessage('Please select a class.');
-                                                    return false;
-                                                }
-                                                return { studentId, classId };
-                                            }
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                $.ajax({
-                                                    url: 'student_elective_allocation.php',
-                                                    method: 'POST',
-                                                    data: {
-                                                        action: 'add_student',
-                                                        student_id: result.value.studentId,
-                                                        subject_info_id: selectedSubjectId,
-                                                        class_id: result.value.classId
-                                                    },
-                                                    dataType: 'json',
-                                                    success: function(response) {
-                                                        if (response.status === 'success') {
-                                                            Swal.fire('Success', response.message, 'success').then(() => {
-                                                                $('#elective-subject').trigger('change');
-                                                            });
-                                                        } else {
-                                                            Swal.fire('Error', response.message || 'Failed to add student.', 'error');
-                                                        }
-                                                    },
-                                                    error: function(xhr, status, error) {
-                                                        console.error('add_student AJAX error:', status, error, 'Response:', xhr.responseText);
-                                                        Swal.fire('Error', 'Failed to add student. Check the console for details.', 'error');
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    } else {
-                                        Swal.fire('Error', classResponse.message || 'Failed to load classes.', 'error');
-                                    }
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error('fetch_classes AJAX error:', status, error, 'Response:', xhr.responseText);
-                                    Swal.fire('Error', 'Failed to load classes for pop-up. Check the console for details.', 'error');
-                                }
-                            });
+                if (isEditing && preSelectedLecType) {
+                    $lecTypeDropdown.val(preSelectedLecType);
+                    if (lecType === 'L' || lecType === 'T') {
+                        $lecTypeDropdown.prop('disabled', true);
+                    } else {
+                        $lecTypeDropdown.prop('disabled', false);
+                    }
+                } else {
+                    if (lecType === 'LT') {
+                        $lecTypeDropdown.val('');
+                        $lecTypeDropdown.prop('disabled', false);
+                    } else if (lecType === 'L') {
+                        $lecTypeDropdown.val('L');
+                        $lecTypeDropdown.prop('disabled', true);
+                    } else if (lecType === 'T') {
+                        $lecTypeDropdown.val('T');
+                        $lecTypeDropdown.prop('disabled', true);
+                    } else {
+                        $lecTypeDropdown.val('');
+                        $lecTypeDropdown.prop('disabled', false);
+                        console.warn('Invalid lec_type:', lecType);
+                    }
+                }
+            }
+
+            // Load Subjects based on Class Group
+            function loadSubjects(isEditing = false, preSelectedSubjectId = null) {
+                if (!selectedClassId) {
+                    Swal.fire('Error', 'Please select a class before adding a slot.', 'error');
+                    $('#slot_form').addClass('hidden');
+                    return;
+                }
+
+                let classGroup = $('#class_batch option:selected').data('group');
+                let electiveSubId = $('#class_batch option:selected').data('electiveSubId') || '';
+                let subjectType = classGroup === 'regular' ? 'mandatory' : 'elective';
+
+                $('#subject').html('<option value="" disabled selected>Select Subject</option>').prop('disabled', false);
+
+                $.ajax({
+                    url: 'fetch_subjects.php',
+                    method: 'POST',
+                    data: {
+                        sem_id: selectedSemId,
+                        type: subjectType,
+                        subId: electiveSubId || null
+                    },
+                    success: function(data) {
+                        console.log('fetch_subjects raw response:', data);
+                        let subjects = data;
+
+                        if (!Array.isArray(subjects)) {
+                            console.error('fetch_subjects error: Expected an array, got:', subjects);
+                            if (subjects && typeof subjects === 'object' && subjects.error) {
+                                Swal.fire('Error', subjects.error, 'error');
+                            } else {
+                                Swal.fire('Error', 'Invalid response format from server when loading subjects.', 'error');
+                            }
+                            $('#subject').prop('disabled', true);
+                            $('#faculty').prop('disabled', true);
+                            $('#lec_type').prop('disabled', true);
+                            return;
+                        }
+
+                        console.log('Subjects:', subjects);
+
+                        if (subjects.length === 0) {
+                            console.error('No subjects found for sem_id:', selectedSemId, 'type:', subjectType, 'subId:', electiveSubId);
+                            Swal.fire('Error', 'No subjects found for this selection. Please ensure subjects are configured.', 'error');
+                            $('#subject').prop('disabled', true);
+                            $('#faculty').prop('disabled', true);
+                            $('#lec_type').prop('disabled', true);
+                            return;
+                        }
+
+                        subjects.forEach(sub => {
+                            $('#subject').append(`<option value="${sub.id}" data-lec-type="${sub.lec_type}">${sub.short_name} - ${sub.subject_name}</option>`);
+                        });
+
+                        if (classGroup === 'elective' && electiveSubId) {
+                            if (subjects[0]?.id) {
+                                $('#subject').val(subjects[0].id).prop('disabled', true);
+                                console.log('Selected elective subject:', subjects[0].id);
+                                loadFaculty(subjects[0].id, selectedClassId);
+                                configureLectureType(subjects[0].lec_type, isEditing, isEditing ? $('#lec_type').val() : null);
+                            } else {
+                                console.error('Elective subject not found for subId:', electiveSubId);
+                                Swal.fire('Error', 'Elective subject not found for this class. Please check subject data.', 'error');
+                                $('#subject').prop('disabled', true);
+                                $('#faculty').prop('disabled', true);
+                                $('#lec_type').prop('disabled', true);
+                            }
+                        } else if (isEditing && preSelectedSubjectId) {
+                            $('#subject').val(preSelectedSubjectId);
+                            console.log('Editing mode, selected subject:', preSelectedSubjectId);
+                            loadFaculty(preSelectedSubjectId, selectedClassId);
+                            let selectedSubject = subjects.find(sub => sub.id == preSelectedSubjectId);
+                            if (selectedSubject) {
+                                configureLectureType(selectedSubject.lec_type, true, $('#lec_type').val());
+                            } else {
+                                console.warn('Selected subject not found in subjects list:', preSelectedSubjectId);
+                                configureLectureType('LT');
+                            }
                         } else {
-                            Swal.fire('Error', response.message || 'Failed to load available students.', 'error');
+                            $('#subject').prop('disabled', false);
+                            $('#faculty').prop('disabled', true);
+                            $('#lec_type').val('').prop('disabled', false);
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('fetch_available_students AJAX error:', status, error, 'Response:', xhr.responseText);
-                        Swal.fire('Error', 'Failed to load available students. Check the console for details.', 'error');
+                        console.error('fetch_subjects AJAX error:', status, error, 'Response:', xhr.responseText);
+                        Swal.fire('Error', 'Failed to load subjects. Please check your network or try again.', 'error');
+                        $('#subject').prop('disabled', true);
+                        $('#faculty').prop('disabled', true);
+                        $('#lec_type').prop('disabled', true);
+                    }
+                });
+            }
+
+            // Load Faculty based on Subject
+            function loadFaculty(subjectId, classId, selectedFacultyId = null) {
+                console.log('loadFaculty called with:', { subjectId, classId, selectedFacultyId });
+                $('#faculty').html('<option value="" disabled selected>Select Faculty</option>').prop('disabled', false);
+                if (subjectId && classId) {
+                    $.ajax({
+                        url: 'fetch_faculty.php',
+                        method: 'POST',
+                        data: {
+                            subject_id: subjectId,
+                            class_id: classId
+                        },
+                        success: function(data) {
+                            console.log('fetch_faculty raw response:', data);
+                            console.log('fetch_faculty response type:', typeof data, 'isArray:', Array.isArray(data));
+                            let faculty = data;
+
+                            if (!Array.isArray(faculty)) {
+                                console.error('fetch_faculty error: Expected an array, got:', faculty);
+                                if (faculty && typeof faculty === 'object' && faculty.error) {
+                                    Swal.fire('Error', faculty.error, 'error');
+                                } else {
+                                    Swal.fire('Error', 'Invalid response format from server when loading faculty. Check console for details.', 'error');
+                                }
+                                $('#faculty').prop('disabled', true);
+                                return;
+                            }
+
+                            console.log('Faculty:', faculty);
+
+                            if (faculty.length === 0) {
+                                console.warn('No faculty found for subject_id:', subjectId, 'class_id:', classId);
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'No Faculty Assigned',
+                                    text: 'No faculty are assigned to this subject and class. Please assign faculty in the admin panel.',
+                                    confirmButtonText: 'OK'
+                                });
+                                $('#faculty').prop('disabled', true);
+                                return;
+                            }
+
+                            faculty.forEach(fac => {
+                                $('#faculty').append(`<option value="${fac.id}">${fac.first_name} ${fac.last_name}</option>`);
+                            });
+
+                            if (faculty.length === 1 && !selectedFacultyId) {
+                                $('#faculty').val(faculty[0].id);
+                                console.log('Auto-selected single faculty:', faculty[0].id);
+                            } else if (selectedFacultyId) {
+                                $('#faculty').val(selectedFacultyId);
+                                console.log('Selected faculty:', selectedFacultyId);
+                            }
+
+                            $('#faculty').prop('disabled', false);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('fetch_faculty AJAX error:', status, error, 'Response:', xhr.responseText);
+                            Swal.fire('Error', 'Failed to load faculty. Please check your network or try again.', 'error');
+                            $('#faculty').prop('disabled', true);
+                        }
+                    });
+                } else {
+                    console.error('loadFaculty: Invalid subjectId or classId', { subjectId, classId });
+                    Swal.fire('Error', 'Invalid subject or class selected for faculty loading.', 'error');
+                    $('#faculty').prop('disabled', true);
+                }
+            }
+
+            // Load Existing Timetable
+            function loadTimetable(semId, classId) {
+                $.ajax({
+                    url: 'fetch_timetable.php',
+                    method: 'POST',
+                    data: {
+                        sem_id: semId,
+                        class_id: classId
+                    },
+                    success: function(data) {
+                        console.log('fetch_timetable raw response:', data);
+                        console.log('fetch_timetable response type:', typeof data, 'isArray:', Array.isArray(data));
+                        let timetable = data;
+
+                        if (!Array.isArray(timetable)) {
+                            console.error('fetch_timetable error: Expected an array, got:', timetable);
+                            if (timetable && typeof timetable === 'object' && timetable.error) {
+                                Swal.fire('Error', timetable.error, 'error');
+                            } else {
+                                Swal.fire('Error', 'Invalid response format from server when loading timetable. Check console for details.', 'error');
+                            }
+                            return;
+                        }
+
+                        console.log('Timetable:', timetable);
+
+                        slots = {
+                            monday: [],
+                            tuesday: [],
+                            wednesday: [],
+                            thursday: [],
+                            friday: []
+                        };
+                        savedSlots = {
+                            monday: [],
+                            tuesday: [],
+                            wednesday: [],
+                            thursday: [],
+                            friday: []
+                        };
+                        timetable.forEach(slot => {
+                            savedSlots[slot.day].push({
+                                id: slot.id,
+                                start_time: slot.start_time,
+                                end_time: slot.end_time,
+                                class_id: slot.class_info_id,
+                                subject_id: slot.subject_info_id,
+                                faculty_id: slot.faculty_info_id,
+                                location_id: slot.class_location_info_id,
+                                lec_type: slot.lec_type,
+                                classname: slot.classname,
+                                batch: slot.batch,
+                                subject_name: slot.subject_name,
+                                faculty_name: slot.faculty_name,
+                                saved: true
+                            });
+                        });
+                        Object.keys(slots).forEach(day => updateTiles(day));
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('fetch_timetable AJAX error:', status, error, 'Response:', xhr.responseText);
+                        Swal.fire('Error', 'Failed to load timetable. Please check your network or try again.', 'error');
+                    }
+                });
+            }
+
+            // Add Slot
+            $('.add-slot').click(function() {
+                if (!selectedClassId) {
+                    Swal.fire('Error', 'Please select a class before adding a slot.', 'error');
+                    return;
+                }
+                $('#slot_day').val($(this).data('day'));
+                $('#edit_index').val('');
+                $('#slot_id').val('');
+                $('#slot_form').removeClass('hidden');
+                $('#start_time, #end_time, #subject, #faculty, #class_location, #lec_type').val('');
+                $('#subject, #faculty').prop('disabled', true);
+                $('#lec_type').val('').prop('disabled', false);
+                loadSubjects();
+                $('#save_slot').text('Save Slot');
+            });
+
+            // Cancel Slot
+            $('#cancel_slot').click(function() {
+                $('#slot_form').addClass('hidden');
+            });
+
+            // Save Slot
+            $('#save_slot').click(function() {
+                let day = $('#slot_day').val();
+                let startTime = $('#start_time').val();
+                let endTime = $('#end_time').val();
+                let classId = selectedClassId;
+                let subjectId = $('#subject').val();
+                let facultyId = $('#faculty').val();
+                let locationId = $('#class_location').val();
+                let lecType = $('#lec_type').val();
+                let editIndex = $('#edit_index').val();
+                let slotId = $('#slot_id').val();
+
+                if (!startTime || !endTime || !classId || !subjectId || !facultyId || !locationId || !lecType) {
+                    Swal.fire('Error', 'Please fill all fields', 'error');
+                    return;
+                }
+
+                let slot = {
+                    start_time: startTime,
+                    end_time: endTime,
+                    class_id: classId,
+                    subject_id: subjectId,
+                    faculty_id: facultyId,
+                    location_id: locationId,
+                    lec_type: lecType,
+                    classname: $('#class_batch option:selected').data('classname'),
+                    batch: $('#class_batch option:selected').data('batch'),
+                    subject_name: $('#subject option:selected').text(),
+                    faculty_name: $('#faculty option:selected').text(),
+                    saved: !!slotId,
+                    id: slotId
+                };
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: slotId ? 'Do you want to update this slot?' : editIndex !== '' ? 'Do you want to save the changes to this slot?' : 'Do you want to add this slot?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, save it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (slotId) {
+                            $.ajax({
+                                url: 'update_slot.php',
+                                method: 'POST',
+                                data: {
+                                    id: slotId,
+                                    day: day,
+                                    start_time: startTime,
+                                    end_time: endTime,
+                                    subject_id: subjectId,
+                                    faculty_id: facultyId,
+                                    class_id: classId,
+                                    location_id: locationId,
+                                    sem_id: selectedSemId,
+                                    lec_type: lecType
+                                },
+                                success: function(response) {
+                                    let res = JSON.parse(response);
+                                    if (res.status === 'success') {
+                                        loadTimetable(selectedSemId, selectedClassId);
+                                        $('#slot_form').addClass('hidden');
+                                        Swal.fire('Success', 'Slot updated successfully!', 'success');
+                                    } else {
+                                        Swal.fire('Error', res.message, 'error');
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('update_slot AJAX error:', status, error, 'Response:', xhr.responseText);
+                                    Swal.fire('Error', 'Failed to delete slot. Please try again.', 'error');
+                                }
+                            });
+                        } else if (editIndex !== '') {
+                            slots[day][editIndex] = slot;
+                            updateTiles(day);
+                            $('#slot_form').addClass('hidden');
+                            Swal.fire('Success', 'Slot updated successfully!', 'success');
+                        } else {
+                            slots[day].push(slot);
+                            updateTiles(day);
+                            $('#slot_form').addClass('hidden');
+                            Swal.fire('Success', 'Slot added successfully!', 'success');
+                        }
                     }
                 });
             });
 
-            // Save changes with confirmation
-            $('#save-btn').click(function() {
-                const allocations = Object.values(changedAllocations);
-                if (allocations.length === 0) {
-                    Swal.fire('Info', 'No changes to save.', 'info');
+            // Edit Slot
+            $(document).on('click', '.edit-slot', function() {
+                let day = $(this).data('day');
+                let index = $(this).data('index');
+                let slot = $(this).hasClass('saved-slot') ? savedSlots[day][index] : slots[day][index];
+
+                $('#slot_day').val(day);
+                $('#edit_index').val($(this).hasClass('saved-slot') ? '' : index);
+                $('#slot_id').val(slot.id || '');
+                $('#start_time').val(slot.start_time);
+                $('#end_time').val(slot.end_time);
+                $('#subject').html('<option value="" disabled selected>Select Subject</option>').prop('disabled', true);
+                $('#faculty').html('<option value="" disabled selected>Select Faculty</option>').prop('disabled', true);
+                $('#class_location').val(slot.location_id);
+                $('#lec_type').val(slot.lec_type);
+
+                loadSubjects(true, slot.subject_id);
+
+                $('#slot_form').removeClass('hidden');
+                $('#save_slot').text(slot.id ? 'Update Slot' : 'Save Slot');
+            });
+
+            // Update Tiles
+            function updateTiles(day) {
+                let tiles = $('#tiles_' + day);
+                tiles.empty();
+
+                function formatTime(timeStr) {
+                    if (!timeStr) return '';
+                    const [hours, minutes] = timeStr.split(':');
+                    const date = new Date();
+                    date.setHours(parseInt(hours), parseInt(minutes));
+                    return date.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                const sortedSavedSlots = savedSlots[day].slice().sort((a, b) => {
+                    return a.start_time.localeCompare(b.start_time);
+                });
+                const sortedSlots = slots[day].slice().sort((a, b) => {
+                    return a.start_time.localeCompare(b.start_time);
+                });
+
+                sortedSavedSlots.forEach((slot, index) => {
+                    let subjectName = slot.subject_name || $('#subject option[value="' + slot.subject_id + '"]').text();
+                    let facultyName = slot.faculty_name || $('#faculty option[value="' + slot.faculty_id + '"]').text();
+                    let locationName = $('#class_location option[value="' + slot.location_id + '"]').text();
+                    let className = slot.classname + (slot.batch ? ' - ' + slot.batch.toUpperCase() : '');
+                    tiles.append(`
+                        <div class="tile">
+                            <span class="saved-tag saved">Saved</span>
+                            <div class="grid grid-cols-2 gap-4 text-left">
+                                <div>
+                                    <p><strong>Time:</strong> ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+                                    <p><strong>Class:</strong> ${className}</p>
+                                    <p><strong>Subject:</strong> ${subjectName} (${slot.lec_type === 'T' ? 'Theory' : 'Lab'})</p>
+                                    <p><strong>Faculty:</strong> ${facultyName}</p>
+                                    <p><strong>Location:</strong> ${locationName}</p>
+                                </div>
+                                <div class="flex items-end">
+                                    <p>
+                                        <button type="button" class="edit-slot saved-slot bg-cyan-600 text-white px-2 py-1 rounded-full hover:bg-cyan-700 font-bold transition-all" data-day="${day}" data-index="${index}">Edit</button>
+                                        <button type="button" class="delete-slot saved-slot bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600 font-bold transition-all ml-2" data-day="${day}" data-index="${index}" data-slot-id="${slot.id}">Delete</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+
+                sortedSlots.forEach((slot, index) => {
+                    let subjectName = slot.subject_name || $('#subject option[value="' + slot.subject_id + '"]').text();
+                    let facultyName = slot.faculty_name || $('#faculty option[value="' + slot.faculty_id + '"]').text();
+                    let locationName = $('#class_location option[value="' + slot.location_id + '"]').text();
+                    let className = slot.classname + (slot.batch ? ' - ' + slot.batch.toUpperCase() : '');
+                    tiles.append(`
+                        <div class="tile">
+                            <span class="saved-tag not-saved">Not Saved</span>
+                            <div class="grid grid-cols-2 gap-4 text-left">
+                                <div>
+                                    <p><strong>Time:</strong> ${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</p>
+                                    <p><strong>Class:</strong> ${className}</p>
+                                    <p><strong>Subject:</strong> ${subjectName} (${slot.lec_type === 'T' ? 'Theory' : 'Lab'})</p>
+                                    <p><strong>Faculty:</strong> ${facultyName}</p>
+                                    <p><strong>Location:</strong> ${locationName}</p>
+                                </div>
+                                <div class="flex items-end">
+                                    <p>
+                                        <button type="button" class="edit-slot bg-cyan-600 text-white px-2 py-1 rounded-full hover:bg-cyan-700 font-bold transition-all" data-day="${day}" data-index="${index}">Edit</button>
+                                        <button type="button" class="delete-slot bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600 font-bold transition-all ml-2" data-day="${day}" data-index="${index}">Delete</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // Delete Slot
+            $(document).on('click', '.delete-slot', function() {
+                let day = $(this).data('day');
+                let index = $(this).data('index');
+                let slotId = $(this).data('slot-id');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to delete this slot?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (slotId) {
+                            $.ajax({
+                                url: 'delete_slot.php',
+                                method: 'POST',
+                                data: {
+                                    id: slotId
+                                },
+                                success: function(response) {
+                                    let res = JSON.parse(response);
+                                    if (res.status === 'success') {
+                                        loadTimetable(selectedSemId, selectedClassId);
+                                        Swal.fire('Success', 'Slot deleted successfully!', 'success');
+                                    } else {
+                                        Swal.fire('Error', res.message, 'error');
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('delete_slot AJAX error:', status, error, 'Response:', xhr.responseText);
+                                    Swal.fire('Error', 'Failed to delete slot. Please try again.', 'error');
+                                }
+                            });
+                        } else {
+                            slots[day].splice(index, 1);
+                            updateTiles(day);
+                            Swal.fire('Success', 'Slot deleted successfully!', 'success');
+                        }
+                    }
+                });
+            });
+
+            // Submit Timetable
+            $('#submit_timetable').click(function() {
+                if (!selectedSemId || !selectedClassId) {
+                    Swal.fire('Error', 'Please select semester and class', 'error');
                     return;
                 }
 
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'Do you want to save the class allocations?',
+                    text: 'Do you want to submit the timetable?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'No',
-                    confirmButtonColor: '#06b6d4',
-                    cancelButtonColor: '#6b7280'
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, submit it!'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'student_elective_allocation.php',
+                            url: 'save_timetable.php',
                             method: 'POST',
                             data: {
-                                action: 'save_allocations',
-                                allocations: JSON.stringify(allocations)
+                                sem_id: selectedSemId,
+                                class_id: selectedClassId,
+                                slots: JSON.stringify(slots)
                             },
-                            dataType: 'json',
                             success: function(response) {
-                                if (response.status === 'success') {
-                                    Swal.fire({
-                                        title: 'Success!',
-                                        text: response.message,
-                                        icon: 'success'
-                                    }).then(() => {
-                                        $('#elective-subject').trigger('change');
-                                    });
+                                let res = JSON.parse(response);
+                                if (res.status === 'success') {
+                                    Swal.fire('Success', 'Timetable saved successfully!', 'success');
+                                    loadTimetable(selectedSemId, selectedClassId);
                                 } else {
-                                    Swal.fire('Error', response.message || 'Failed to save allocations.', 'error');
+                                    Swal.fire('Error', res.message, 'error');
                                 }
                             },
                             error: function(xhr, status, error) {
-                                console.error('save_allocations AJAX error:', status, error, 'Response:', xhr.responseText);
-                                Swal.fire('Error', 'Failed to save allocations. Check the console for details.', 'error');
+                                console.error('save_timetable AJAX error:', status, error, 'Response:', xhr.responseText);
+                                Swal.fire('Error', 'Failed to save timetable. Please try again.', 'error');
                             }
                         });
                     }
                 });
+            });
+
+            // Load Faculty and Configure Lecture Type on Subject Change
+            $('#subject').change(function() {
+                let subjectId = $(this).val();
+                if (subjectId) {
+                    loadFaculty(subjectId, selectedClassId);
+                    let $selectedOption = $('#subject option:selected');
+                    let lecType = $selectedOption.data('lec-type');
+                    configureLectureType(lecType);
+                } else {
+                    $('#faculty').html('<option value="" disabled selected>Select Faculty</option>').prop('disabled', true);
+                    $('#lec_type').val('').prop('disabled', false);
+                }
             });
         });
     </script>

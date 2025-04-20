@@ -159,7 +159,7 @@ if ($package_range_result) {
     }
 }
 
-// Query for placement percentage by batch
+// Query for placement percentage by batch (only batches ending on or before current year)
 $placement_percentage_query = "
 SELECT 
     b.id,
@@ -175,6 +175,7 @@ FROM batch_info b
 LEFT JOIN student_info s ON s.batch_info_id = b.id
 LEFT JOIN placement_support_enroll pse ON s.id = pse.student_info_id
 LEFT JOIN placed_student_info ps ON s.id = ps.student_info_id
+WHERE b.batch_end_year <= YEAR(CURDATE())
 GROUP BY b.id, b.batch_start_year, b.batch_end_year
 ORDER BY b.batch_start_year";
 $placement_percentage_result = $conn->query($placement_percentage_query);

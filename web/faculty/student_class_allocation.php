@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <div class="p-6 bg-white rounded-xl shadow-md">
                 <div class="flex justify-between items-center mb-6">
                     <button id="save-btn" class="bg-cyan-500 shadow-md hover:shadow-xl px-6 text-white p-2 rounded-full hover:bg-cyan-600 transition-all" disabled>Save Changes</button>
-                    <input type="text" id="search-student" class="w-64 p-2 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Search student name...">
+                    <input type="search" id="search-student" class="w-64 p-2 border-2 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none" placeholder="Search student name..." aria-controls="student-table">
                 </div>
                 <table id="student-table" class="min-w-full bg-white shadow-lg rounded-md border border-gray-300">
                     <thead>

@@ -39,7 +39,7 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
     if (mysqli_num_rows($companies_result) > 0) {
         echo '<table id="companies-table" class="min-w-full bg-white shadow-md rounded-md table-fixed">';
         echo '<thead>';
-        echo '<tr class="bg-cyan-600 text-white rounded-t-md">';
+        echo '<tr class="bg-gray-700 text-white rounded-t-md">';
         echo '<th class="border px-4 py-2 rounded-tl-md w-1/12">No</th>';
         echo '<th class="border px-4 py-2 w-5/12">Company Name</th>';
         echo '<th class="border px-4 py-2 w-3/12">Date</th>';
@@ -49,7 +49,7 @@ if (isset($_GET['fetch_companies']) && isset($_GET['batch_id'])) {
         echo '<tbody>';
         $counter = 1;
         while ($company = mysqli_fetch_assoc($companies_result)) {
-            echo "<tr class='hover:bg-cyan-100 transition-all cursor-pointer' onclick=\"window.location.href='campus_drive_company.php?drive_id={$company['driveId']}'\">";
+            echo "<tr class='hover:bg-gray-200 transition-all cursor-pointer' onclick=\"window.location.href='campus_drive_company.php?drive_id={$company['driveId']}'\">";
             echo "<td class='border px-4 py-2 text-center'>{$counter}</td>";
             echo "<td class='border px-4 py-2'>{$company['company_name']}</td>";
             echo "<td class='border px-4 py-2 text-center'>" . ($company['date'] ? date("d/m/Y", strtotime($company['date'])) : "Will be declared") . "</td>";

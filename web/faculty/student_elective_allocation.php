@@ -139,10 +139,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             exit;
         }
 
-        $query = "INSERT INTO elective_allocation (student_info_id, subject_info_id, class_info_id) 
-                  VALUES (?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'iii', $student_id, $subject_id, $class_id);
+        if (!$class_id) {
+            $query = "INSERT INTO elective_allocation (student_info_id, subject_info_id) 
+                      VALUES (?, ?)";
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, 'ii', $student_id, $subject_id);
+        } else {
+            $query = "INSERT INTO elective_allocation (student_info_id, subject_info_id, class_info_id) 
+                      VALUES (?, ?, ?)";
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, 'iii', $student_id, $subject_id, $class_id);
+        }
+
         $success = mysqli_stmt_execute($stmt);
 
         mysqli_stmt_close($stmt);

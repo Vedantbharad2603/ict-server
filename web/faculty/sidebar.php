@@ -179,6 +179,16 @@ $color = "cyan";
                             </a>
                         </li>
                         <?php endif; ?>
+
+                        <?php if ($userdata['designation'] === 'hod'): ?>
+                        <li>
+                            <a href="manage_exam_results.php">
+                                <div class="w-full h-10 flex items-center px-5 text-grey-500 transition bg-transparent hover:bg-<?php echo $color; ?>-600 hover:text-white active:bg-<?php echo $color; ?>-900 <?php echo $radious; ?>">
+                                    Examination & Viva Results
+                                </div>
+                            </a>
+                        </li>
+                        <?php endif; ?>
                         
                         <?php if ($userdata['designation'] === 'hod'): ?>
                         <li>
@@ -247,6 +257,7 @@ $color = "cyan";
                         arrow.style.transform = "rotate(0deg)";
                         // Remove highlight
                         box.classList.remove('bg-<?php echo $color; ?>-600', 'text-white');
+                        box.classList.add('text-gray-600');
                     }
                 }
             </script>
